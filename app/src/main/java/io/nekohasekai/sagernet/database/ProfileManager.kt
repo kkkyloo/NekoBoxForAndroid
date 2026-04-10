@@ -11,7 +11,6 @@ import java.io.IOException
 import java.sql.SQLException
 import java.util.*
 
-
 object ProfileManager {
 
     interface Listener {
@@ -139,8 +138,6 @@ object ProfileManager {
         }
     }
 
-    // postUpdate: post to listeners, don't change the DB
-
     suspend fun postUpdate(profileId: Long, noTraffic: Boolean = false) {
         postUpdate(getProfile(profileId) ?: return, noTraffic)
     }
@@ -185,66 +182,99 @@ object ProfileManager {
         var rules = SagerDatabase.rulesDao.allRules()
         if (rules.isEmpty() && !DataStore.rulesFirstCreate) {
             DataStore.rulesFirstCreate = true
-            
+
+            // 1. ALLOW NEKOBOX
             createRule(
                 RuleEntity(
                     name = "ALLOW NEKOBOX",
                     packages = setOf(io.nekohasekai.sagernet.BuildConfig.APPLICATION_ID),
-                    outbound = 0L // proxy
+                    outbound = 0L,
+                    enabled = true
                 ), false
             )
-            
+
+            // 2. BLOCK SOCKS5
             createRule(
                 RuleEntity(
                     name = "BLOCK SOCKS5",
                     config = "{\"inbound\":[\"mixed-in\", \"socks-in\"]}",
-                    outbound = -2L // block
+                    outbound = -2L,
+                    enabled = true
                 ), false
             )
 
+            // 3. ALLOW APPS
+            createRule(
+                RuleEntity(
+                    name = "ALLOW APPS (Select Here)",
+                    packages = setOf(),
+                    outbound = 0L,
+                    enabled = true
+                ), false
+            )
+
+            // 4. BLOCK ALL OTHER
+            createRule(
+                RuleEntity(
+                    name = "BLOCK ALL OTHER",
+                    ip = "0.0.0.0/0\n::/0",
+                    outbound = -2L,
+                    enabled = true
+                ), false
+            )
+
+            // Base Neko Rules
             createRule(
                 RuleEntity(
                     name = app.getString(R.string.route_opt_block_quic),
                     port = "443",
                     network = "udp",
-                    outbound = -2
-                )
+                    outbound = -2L,
+                    enabled = true
+                ), false
             )
             createRule(
                 RuleEntity(
                     name = app.getString(R.string.route_opt_block_ads),
                     domains = "geosite:category-ads-all",
-                    outbound = -2
-                )
+                    outbound = -2L,
+                    enabled = true
+                ), false
             )
+
             val fuckedCountry = mutableListOf("cn:中国")
             if (Locale.getDefault().country != Locale.CHINA.country) {
-                // 非中文用户
                 fuckedCountry += "ir:Iran"
                 fuckedCountry += "ru:Russia"
             }
+
             for (c in fuckedCountry) {
                 val country = c.substringBefore(":")
                 val displayCountry = c.substringAfter(":")
-                //
-                if (country == "cn") createRule(
-                    RuleEntity(
-                        name = app.getString(R.string.route_play_store, displayCountry),
-                        domains = "googleapis.cn",
-                    ), false
-                )
+
+                if (country == "cn") {
+                    createRule(
+                        RuleEntity(
+                            name = app.getString(R.string.route_play_store, displayCountry),
+                            domains = "googleapis.cn",
+                            enabled = true
+                        ), false
+                    )
+                }
                 createRule(
                     RuleEntity(
                         name = app.getString(R.string.route_bypass_domain, displayCountry),
                         domains = "geosite:$country",
-                        outbound = -1
+                        outbound = -1L,
+                        enabled = true
                     ), false
                 )
                 createRule(
                     RuleEntity(
                         name = app.getString(R.string.route_bypass_ip, displayCountry),
                         ip = "geoip:$country",
-                        outbound = -1
+                        outbound = -1L,
+                        enabled = true
                     ), false
                 )
             }
@@ -252,5 +282,4 @@ object ProfileManager {
         }
         return rules
     }
-
 }
