@@ -185,6 +185,23 @@ object ProfileManager {
         var rules = SagerDatabase.rulesDao.allRules()
         if (rules.isEmpty() && !DataStore.rulesFirstCreate) {
             DataStore.rulesFirstCreate = true
+            
+            createRule(
+                RuleEntity(
+                    name = "ALLOW NEKOBOX",
+                    packages = setOf(io.nekohasekai.sagernet.BuildConfig.APPLICATION_ID),
+                    outbound = 0L // proxy
+                ), false
+            )
+            
+            createRule(
+                RuleEntity(
+                    name = "BLOCK SOCKS5",
+                    config = "{\"inbound\":[\"mixed-in\", \"socks-in\"]}",
+                    outbound = -2L // block
+                ), false
+            )
+
             createRule(
                 RuleEntity(
                     name = app.getString(R.string.route_opt_block_quic),

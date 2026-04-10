@@ -37,6 +37,9 @@ object Key {
     const val BYPASS_LAN_IN_CORE = "bypassLanInCore"
 
     const val MIXED_PORT = "mixedPort"
+    const val ENABLE_LOCAL_PROXY_IN_VPN = "enableLocalProxyInVpn"
+    const val MIXED_USERNAME = "mixedUsername"
+    const val MIXED_PASSWORD = "mixedPassword"
     const val ALLOW_ACCESS = "allowAccess"
     const val SPEED_INTERVAL = "speedInterval"
     const val SHOW_DIRECT_SPEED = "showDirectSpeed"
@@ -151,6 +154,8 @@ object Key {
 
     const val APP_TLS_VERSION = "appTLSVersion"
     const val ENABLE_CLASH_API = "enableClashAPI"
+    const val CLASH_API_SECRET = "clashApiSecret"
+
 }
 
 object TunImplementation {

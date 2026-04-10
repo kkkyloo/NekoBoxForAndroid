@@ -86,6 +86,11 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var appTLSVersion by configurationStore.string(Key.APP_TLS_VERSION)
     var enableClashAPI by configurationStore.boolean(Key.ENABLE_CLASH_API)
+
+    var clashApiSecret by configurationStore.string(Key.CLASH_API_SECRET) { 
+        moe.matsuri.nb4a.utils.Util.generateCryptoSecurePassword(16) 
+    }
+
     var showBottomBar by configurationStore.boolean(Key.SHOW_BOTTOM_BAR)
 
     var allowInsecureOnRequest by configurationStore.boolean(Key.ALLOW_INSECURE_ON_REQUEST)
@@ -125,13 +130,26 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
     private val userIndex by lazy { Binder.getCallingUserHandle().hashCode() }
+
+    var enableLocalProxyInVpn by configurationStore.boolean(Key.ENABLE_LOCAL_PROXY_IN_VPN) { false }
+
     var mixedPort: Int
         get() = getLocalPort(Key.MIXED_PORT, 2080)
         set(value) = saveLocalPort(Key.MIXED_PORT, value)
 
+    var mixedUsername by configurationStore.string(Key.MIXED_USERNAME) { "User" }
+    var mixedPassword by configurationStore.string(Key.MIXED_PASSWORD) { moe.matsuri.nb4a.utils.Util.generateCryptoSecurePassword() }
+
     fun initGlobal() {
         if (configurationStore.getString(Key.MIXED_PORT) == null) {
             mixedPort = mixedPort
+        }
+
+        if (configurationStore.getString(Key.MIXED_PASSWORD) == null) {
+            mixedPassword = mixedPassword
+        }
+        if (configurationStore.getString(Key.CLASH_API_SECRET) == null) {
+            clashApiSecret = clashApiSecret
         }
     }
 
@@ -162,7 +180,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var tunImplementation by configurationStore.stringToInt(Key.TUN_IMPLEMENTATION) { TunImplementation.GVISOR }
     var profileTrafficStatistics by configurationStore.boolean(Key.PROFILE_TRAFFIC_STATISTICS) { true }
 
-    var yacdURL by configurationStore.string("yacdURL") { "http://127.0.0.1:9090/ui" }
+    var yacdURL by configurationStore.string("yacdURL") { 
+        "http://127.0.0.1:9090/ui/?hostname=127.0.0.1&port=9090&secret=${clashApiSecret}" 
+    }
 
     // protocol
 

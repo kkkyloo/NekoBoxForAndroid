@@ -62,9 +62,17 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             true
         }
         val mixedPort = findPreference<EditTextPreference>(Key.MIXED_PORT)!!
+        val enableLocalProxyInVpn = findPreference<SwitchPreference>(Key.ENABLE_LOCAL_PROXY_IN_VPN)!! 
+        val mixedUsername = findPreference<EditTextPreference>(Key.MIXED_USERNAME)!!
+        val mixedPassword = findPreference<EditTextPreference>(Key.MIXED_PASSWORD)!!
         val serviceMode = findPreference<Preference>(Key.SERVICE_MODE)!!
         val allowAccess = findPreference<Preference>(Key.ALLOW_ACCESS)!!
         val appendHttpProxy = findPreference<SwitchPreference>(Key.APPEND_HTTP_PROXY)!!
+        appendHttpProxy.isEnabled = DataStore.enableLocalProxyInVpn 
+        enableLocalProxyInVpn.setOnPreferenceChangeListener { _, newValue ->
+            appendHttpProxy.isEnabled = newValue as Boolean
+            reloadListener.onPreferenceChange(enableLocalProxyInVpn, newValue)
+        }
 
         val showDirectSpeed = findPreference<SwitchPreference>(Key.SHOW_DIRECT_SPEED)!!
         val ipv6Mode = findPreference<Preference>(Key.IPV6_MODE)!!
@@ -149,6 +157,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         mixedPort.onPreferenceChangeListener = reloadListener
+        enableLocalProxyInVpn.onPreferenceChangeListener = reloadListener
+        mixedUsername.onPreferenceChangeListener = reloadListener
+        mixedPassword.onPreferenceChangeListener = reloadListener
         appendHttpProxy.onPreferenceChangeListener = reloadListener
         showDirectSpeed.onPreferenceChangeListener = reloadListener
         trafficSniffing.onPreferenceChangeListener = reloadListener

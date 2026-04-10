@@ -160,6 +160,7 @@ fun buildConfig(
             clash_api = ClashAPIOptions().apply {
                 external_controller = "127.0.0.1:9090"
                 external_ui = "../files/yacd"
+                secret = DataStore.clashApiSecret 
             }
         }
 
@@ -213,26 +214,32 @@ fun buildConfig(
                     IPv6Mode.DISABLE -> {
                         inet4_address = listOf(VpnService.PRIVATE_VLAN4_CLIENT + "/28")
                     }
-
                     IPv6Mode.ONLY -> {
                         inet6_address = listOf(VpnService.PRIVATE_VLAN6_CLIENT + "/126")
                     }
-
                     else -> {
                         inet4_address = listOf(VpnService.PRIVATE_VLAN4_CLIENT + "/28")
                         inet6_address = listOf(VpnService.PRIVATE_VLAN6_CLIENT + "/126")
                     }
                 }
             })
-            inbounds.add(Inbound_MixedOptions().apply {
-                type = "mixed"
-                tag = TAG_MIXED
-                listen = bind
-                listen_port = DataStore.mixedPort
-                domain_strategy = genDomainStrategy(DataStore.resolveDestination)
-                sniff = needSniff
-                sniff_override_destination = needSniffOverride
-            })
+
+            if (!isVPN || DataStore.enableLocalProxyInVpn) {
+                inbounds.add(Inbound_MixedOptions().apply {
+                    type = "mixed"
+                    tag = TAG_MIXED
+                    listen = bind
+                    listen_port = DataStore.mixedPort
+                    domain_strategy = genDomainStrategy(DataStore.resolveDestination)
+                    sniff = needSniff
+                    sniff_override_destination = needSniffOverride
+                    
+                    users = listOf(SingBoxOptions.User().apply {
+                        username = DataStore.mixedUsername
+                        password = DataStore.mixedPassword
+                    })
+                })
+            }
         }
 
         outbounds = mutableListOf()
