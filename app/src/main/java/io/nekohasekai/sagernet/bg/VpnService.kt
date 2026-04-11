@@ -43,8 +43,8 @@ class VpnService : BaseVpnService(),
 
     override suspend fun startProcesses() {
     DataStore.vpnService = this
-    super.startProcesses()          
-    watchdog.start(GlobalScope)     
+    super.startProcesses()
+    watchdog.start()  // ← убрали GlobalScope, watchdog сам управляет скоупом
 }
 
     override var wakeLock: PowerManager.WakeLock? = null
