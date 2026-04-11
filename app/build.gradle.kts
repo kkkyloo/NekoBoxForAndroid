@@ -10,21 +10,6 @@ plugins {
 setupApp()
 
 android {
-    // 1. Принудительно отключаем Splits, которые включил setupApp()
-    splits {
-        abi {
-            isEnable = false 
-        }
-    }
-
-    defaultConfig {
-        // 2. Очищаем все фильтры и ставим только arm64
-        ndk {
-            abiFilters.clear()
-            abiFilters.add("arm64-v8a")
-        }
-    }
-
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
     }
