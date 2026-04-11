@@ -10,6 +10,12 @@ plugins {
 setupApp()
 
 android {
+    defaultConfig {
+        ndk {
+            abiFilters.add("arm64-v8a")
+        }
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
     }
