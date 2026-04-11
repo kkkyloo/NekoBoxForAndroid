@@ -183,62 +183,43 @@ object ProfileManager {
         if (rules.isEmpty() && !DataStore.rulesFirstCreate) {
             DataStore.rulesFirstCreate = true
 
-            // 1. Разрешаем NekoBox (само приложение идет через VPN)
+            // 1. Блокировка QUIC (помогает от замедлений YouTube/Instagram)
             createRule(
                 RuleEntity(
-                    name = "ALLOW NEKOBOX",
-                    packages = setOf(io.nekohasekai.sagernet.BuildConfig.APPLICATION_ID),
-                    outbound = 0L, // В прокси
+                    name = app.getString(R.string.route_opt_block_quic),
+                    port = "443",
+                    network = "udp",
+                    outbound = -2L, // Block
                     enabled = true
                 ), false
             )
 
-            // 2. Блокировка рекламы (по желанию, оставляем полезным)
+            // 2. Блокировка рекламы
             createRule(
                 RuleEntity(
                     name = app.getString(R.string.route_opt_block_ads),
                     domains = "geosite:category-ads-all",
-                    outbound = -2L, // В блок (Reject)
+                    outbound = -2L, // Block
                     enabled = true
                 ), false
             )
 
-            // 3. Весь RU-доменный трафик (yandex, vk, mailru, госуслуги) пускаем в обход VPN
+            // 3. Обход для RU доменов (идут напрямую)
             createRule(
                 RuleEntity(
-                    name = "BYPASS RU DOMAINS",
+                    name = "Bypass RU Domains",
                     domains = "geosite:category-ru\ngeosite:yandex\ngeosite:vk\ngeosite:mailru\ndomain:ru\ndomain:su\ndomain:рф",
-                    outbound = -1L, // Напрямую (Bypass)
+                    outbound = -1L, // Bypass
                     enabled = true
                 ), false
             )
 
-            // 4. Все российские IP-адреса пускаем в обход VPN
+            // 4. Обход для RU IP-адресов (идут напрямую)
             createRule(
                 RuleEntity(
-                    name = "BYPASS RU IP",
+                    name = "Bypass RU IP",
                     ip = "geoip:ru",
-                    outbound = -1L, // Напрямую (Bypass)
-                    enabled = true
-                ), false
-            )
-
-            // 5. Разрешаем выбранным приложениям идти в прокси (работает в связке с Apps VPN mode)
-            createRule(
-                RuleEntity(
-                    name = "ALLOW APPS (Select Here)",
-                    packages = setOf(), // Сюда добавляются выбранные в UI приложения
-                    outbound = 0L, // В прокси
-                    enabled = true
-                ), false
-            )
-
-            // 6. Весь остальной "левый" трафик, который попытается пролезть (например, через loopback), сбрасываем в Direct
-            createRule(
-                RuleEntity(
-                    name = "BYPASS ALL OTHER",
-                    ip = "0.0.0.0/0\n::/0",
-                    outbound = -1L, // Напрямую (Не Block, чтобы не ломать DNS и локалку)
+                    outbound = -1L, // Bypass
                     enabled = true
                 ), false
             )
