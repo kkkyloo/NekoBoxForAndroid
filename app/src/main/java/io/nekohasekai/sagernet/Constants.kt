@@ -156,6 +156,9 @@ object Key {
     const val ENABLE_CLASH_API = "enableClashAPI"
     const val CLASH_API_SECRET = "clashApiSecret"
 
+    const val VPN_WATCHDOG_ENABLED = "vpnWatchdogEnabled"
+    const val VPN_WATCHDOG_INTERVAL = "vpnWatchdogInterval"
+
 }
 
 object TunImplementation {

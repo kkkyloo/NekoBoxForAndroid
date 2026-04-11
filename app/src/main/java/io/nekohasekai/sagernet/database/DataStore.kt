@@ -97,6 +97,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var networkChangeResetConnections by configurationStore.boolean(Key.NETWORK_CHANGE_RESET_CONNECTIONS) { true }
     var wakeResetConnections by configurationStore.boolean(Key.WAKE_RESET_CONNECTIONS)
 
+    var vpnWatchdogEnabled by configurationStore.boolean(Key.VPN_WATCHDOG_ENABLED) { false }
+    var vpnWatchdogInterval by configurationStore.stringToInt(Key.VPN_WATCHDOG_INTERVAL) { 7 } 
     //
 
     var isExpert by configurationStore.boolean(Key.APP_EXPERT)

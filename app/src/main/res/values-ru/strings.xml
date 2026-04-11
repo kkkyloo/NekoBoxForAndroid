@@ -479,6 +479,10 @@
 <string name="vpn_connected">Подключено, нажмите для проверки подключения</string>
 <string name="vpn_permission_denied">Отказано в разрешении на создание службы VPN</string>
 <string name="wake_reset_connections">Сбросить исходящие соединения при выходе из спящего режима</string>
+<string name="vpn_watchdog">Авто-переподключение</string>
+<string name="vpn_watchdog_summary">Перезапускать VPN при зависании (~90 сек)</string>
+<string name="vpn_watchdog_test">🧪 Протестировать watchdog</string>
+<string name="vpn_watchdog_test_summary">Форсировать перезапуск VPN прямо сейчас для проверки</string>
 <string name="warp_generate">Создать конфигурацию</string>
 <string name="warp_license">CloudFlare Warp - это бесплатный VPN-провайдер WireGuard. Используя его, вы соглашаетесь с условиями использования.</string>
 <string name="wireguard_local_address">Частный адрес</string>
