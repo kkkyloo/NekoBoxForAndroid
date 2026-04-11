@@ -189,25 +189,28 @@
             app:title="@string/enable_fakedns" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/inbound_settings">
+    <PreferenceCategory 
+        app:title="@string/inbound_settings"
+        app:isPreferenceVisible="false">
+        
         <SwitchPreference
             app:key="enableLocalProxyInVpn"
-            android:visible="false" /> 
+            app:isPreferenceVisible="false" />
         <EditTextPreference
             app:key="mixedPort"
-            android:visible="false" /> <!-- ИСПРАВЛЕНО -->
+            app:isPreferenceVisible="false" />
         <EditTextPreference
             app:key="mixedUsername"
-            android:visible="false" /> <!-- ИСПРАВЛЕНО -->
+            app:isPreferenceVisible="false" />
         <EditTextPreference
             app:key="mixedPassword"
-            android:visible="false" /> <!-- ИСПРАВЛЕНО -->
+            app:isPreferenceVisible="false" />
         <SwitchPreference
             app:key="appendHttpProxy"
-            android:visible="false" /> <!-- ИСПРАВЛЕНО -->
+            app:isPreferenceVisible="false" />
         <SwitchPreference
             app:key="allowAccess"
-            android:visible="false" /> <!-- ИСПРАВЛЕНО -->
+            app:isPreferenceVisible="false" /> 
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_misc">

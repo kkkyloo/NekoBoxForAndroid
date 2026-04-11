@@ -44,10 +44,7 @@ object PackageCache {
         )
 
         installedPackages = rawPackageInfo.filter {
-            when (it.packageName) {
-                "android" -> true
-                else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
-            }
+            it.applicationInfo != null
         }.associateBy { it.packageName }
 
         installedPluginPackages = rawPackageInfo.filter {
