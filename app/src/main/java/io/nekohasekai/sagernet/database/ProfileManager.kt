@@ -183,101 +183,66 @@ object ProfileManager {
         if (rules.isEmpty() && !DataStore.rulesFirstCreate) {
             DataStore.rulesFirstCreate = true
 
-            // 1. ALLOW NEKOBOX
+            // 1. Разрешаем NekoBox (само приложение идет через VPN)
             createRule(
                 RuleEntity(
                     name = "ALLOW NEKOBOX",
                     packages = setOf(io.nekohasekai.sagernet.BuildConfig.APPLICATION_ID),
-                    outbound = 0L,
+                    outbound = 0L, // В прокси
                     enabled = true
                 ), false
             )
 
-            // 2. BLOCK SOCKS5
-            createRule(
-                RuleEntity(
-                    name = "BLOCK SOCKS5",
-                    config = "{\"inbound\":[\"mixed-in\", \"socks-in\"]}",
-                    outbound = -2L,
-                    enabled = true
-                ), false
-            )
-
-            // 3. ALLOW APPS
-            createRule(
-                RuleEntity(
-                    name = "ALLOW APPS (Select Here)",
-                    packages = setOf(),
-                    outbound = 0L,
-                    enabled = true
-                ), false
-            )
-
-            // 4. BLOCK ALL OTHER
-            createRule(
-                RuleEntity(
-                    name = "BLOCK ALL OTHER",
-                    ip = "0.0.0.0/0\n::/0",
-                    outbound = -2L,
-                    enabled = true
-                ), false
-            )
-
-            // Base Neko Rules
-            createRule(
-                RuleEntity(
-                    name = app.getString(R.string.route_opt_block_quic),
-                    port = "443",
-                    network = "udp",
-                    outbound = -2L,
-                    enabled = true
-                ), false
-            )
+            // 2. Блокировка рекламы (по желанию, оставляем полезным)
             createRule(
                 RuleEntity(
                     name = app.getString(R.string.route_opt_block_ads),
                     domains = "geosite:category-ads-all",
-                    outbound = -2L,
+                    outbound = -2L, // В блок (Reject)
                     enabled = true
                 ), false
             )
 
-            val fuckedCountry = mutableListOf("cn:中国")
-            if (Locale.getDefault().country != Locale.CHINA.country) {
-                fuckedCountry += "ir:Iran"
-                fuckedCountry += "ru:Russia"
-            }
+            // 3. Весь RU-доменный трафик (yandex, vk, mailru, госуслуги) пускаем в обход VPN
+            createRule(
+                RuleEntity(
+                    name = "BYPASS RU DOMAINS",
+                    domains = "geosite:category-ru\ngeosite:yandex\ngeosite:vk\ngeosite:mailru\ndomain:ru\ndomain:su\ndomain:рф",
+                    outbound = -1L, // Напрямую (Bypass)
+                    enabled = true
+                ), false
+            )
 
-            for (c in fuckedCountry) {
-                val country = c.substringBefore(":")
-                val displayCountry = c.substringAfter(":")
+            // 4. Все российские IP-адреса пускаем в обход VPN
+            createRule(
+                RuleEntity(
+                    name = "BYPASS RU IP",
+                    ip = "geoip:ru",
+                    outbound = -1L, // Напрямую (Bypass)
+                    enabled = true
+                ), false
+            )
 
-                if (country == "cn") {
-                    createRule(
-                        RuleEntity(
-                            name = app.getString(R.string.route_play_store, displayCountry),
-                            domains = "googleapis.cn",
-                            enabled = true
-                        ), false
-                    )
-                }
-                createRule(
-                    RuleEntity(
-                        name = app.getString(R.string.route_bypass_domain, displayCountry),
-                        domains = "geosite:$country",
-                        outbound = -1L,
-                        enabled = true
-                    ), false
-                )
-                createRule(
-                    RuleEntity(
-                        name = app.getString(R.string.route_bypass_ip, displayCountry),
-                        ip = "geoip:$country",
-                        outbound = -1L,
-                        enabled = true
-                    ), false
-                )
-            }
+            // 5. Разрешаем выбранным приложениям идти в прокси (работает в связке с Apps VPN mode)
+            createRule(
+                RuleEntity(
+                    name = "ALLOW APPS (Select Here)",
+                    packages = setOf(), // Сюда добавляются выбранные в UI приложения
+                    outbound = 0L, // В прокси
+                    enabled = true
+                ), false
+            )
+
+            // 6. Весь остальной "левый" трафик, который попытается пролезть (например, через loopback), сбрасываем в Direct
+            createRule(
+                RuleEntity(
+                    name = "BYPASS ALL OTHER",
+                    ip = "0.0.0.0/0\n::/0",
+                    outbound = -1L, // Напрямую (Не Block, чтобы не ломать DNS и локалку)
+                    enabled = true
+                ), false
+            )
+
             rules = SagerDatabase.rulesDao.allRules()
         }
         return rules

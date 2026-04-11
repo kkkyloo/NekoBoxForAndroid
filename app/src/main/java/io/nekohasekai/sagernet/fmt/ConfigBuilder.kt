@@ -209,7 +209,7 @@ fun buildConfig(
                 mtu = DataStore.mtu
                 domain_strategy = genDomainStrategy(DataStore.resolveDestination)
                 sniff = needSniff
-                sniff_override_destination = needSniffOverride
+                sniff_override_destination = false 
                 when (ipv6Mode) {
                     IPv6Mode.DISABLE -> {
                         inet4_address = listOf(VpnService.PRIVATE_VLAN4_CLIENT + "/28")
@@ -224,12 +224,12 @@ fun buildConfig(
                 }
             })
 
-            if (!isVPN || DataStore.enableLocalProxyInVpn) {
-                inbounds.add(Inbound_MixedOptions().apply {
-                    type = "mixed"
-                    tag = TAG_MIXED
-                    listen = bind
-                    listen_port = DataStore.mixedPort
+            if (!isVPN) { // УБРАЛИ DataStore.enableLocalProxyInVpn. В режиме VPN порт больше не открывается!
+    inbounds.add(Inbound_MixedOptions().apply {
+        type = "mixed"
+        tag = TAG_MIXED
+        listen = bind
+        listen_port = DataStore.mixedPort
                     domain_strategy = genDomainStrategy(DataStore.resolveDestination)
                     sniff = needSniff
                     sniff_override_destination = needSniffOverride
