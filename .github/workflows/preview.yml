@@ -2,6 +2,9 @@ name: Preview Build
 on:
   workflow_dispatch:
     inputs:
+  push:
+    tags:
+      - 'v*'
 jobs:
   libcore:
     name: Native Build (LibCore)
@@ -67,3 +70,12 @@ jobs:
         with:
           name: APKs
           path: ${{ env.APK }}
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.APK }}/*.apk
+          prerelease: true
+          name: Preview ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
