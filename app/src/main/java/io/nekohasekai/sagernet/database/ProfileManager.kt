@@ -206,13 +206,39 @@ object ProfileManager {
 
             // 3. Обход для RU доменов (идут напрямую)
             createRule(
-                RuleEntity(
-                    name = "Bypass RU Domains",
-                    domains = "geosite:category-ru\ngeosite:yandex\ngeosite:vk\ngeosite:mailru\ndomain:ru\ndomain:su\ndomain:рф",
-                    outbound = -1L, // Bypass
-                    enabled = true
-                ), false
-            )
+            RuleEntity(
+                name = "Bypass RU Domains",
+                domains = listOf(
+                    "geosite:category-ru",
+                    "geosite:category-gov-ru",
+                    "geosite:category-bank-ru",
+                    "geosite:yandex",
+                    "geosite:vk",
+                    "geosite:mailru",
+                    "domain:ru",
+                    "domain:su",
+                    "domain:рф",
+                    // На случай если geosite не покрывает — явные крупные сервисы:
+                    "domain:wildberries.ru",
+                    "domain:wbstatic.net",
+                    "domain:wbx-content.ru",
+                    "domain:ozon.ru",
+                    "domain:ozonru.me",
+                    "domain:cdn1.ozonusercontent.com",
+                    "domain:sber.ru",
+                    "domain:sberbank.ru",
+                    "domain:tinkoff.ru",
+                    "domain:tbank.ru",
+                    "domain:vtb.ru",
+                    "domain:max.ru",
+                    "domain:gosuslugi.ru",
+                    "domain:nalog.ru",
+                    "domain:mos.ru"
+                ).joinToString("\n"),
+                outbound = -1L, // Bypass
+                enabled = true
+            ), false
+        )
 
             // 4. Обход для RU IP-адресов (идут напрямую)
             createRule(

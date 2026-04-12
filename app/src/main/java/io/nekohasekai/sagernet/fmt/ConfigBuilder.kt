@@ -672,7 +672,7 @@ fun buildConfig(
 
         route.rules.add(Rule_DefaultOptions().apply {
             port = listOf(853)
-            outbound = TAG_DIRECT
+            outbound = TAG_PROXY
         })
 
         for (freedom in arrayOf(TAG_DIRECT, TAG_BYPASS)) outbounds.add(Outbound().apply {
