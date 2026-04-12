@@ -136,8 +136,12 @@ fun buildConfig(
     val bind = if (!forTest && DataStore.allowAccess) "0.0.0.0" else LOCALHOST
     val remoteDns = DataStore.remoteDns.split("\n")
         .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
-    val directDNS = DataStore.directDns.split("\n")
-        .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
+    val directDNS = if (DataStore.useLocalDns) {
+        listOf("local")
+    } else {
+        DataStore.directDns.split("\n")
+            .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
+    }
     val enableDnsRouting = DataStore.enableDnsRouting
     val useFakeDns = DataStore.enableFakeDns && !forTest
     val needSniff = DataStore.trafficSniffing > 0
@@ -644,9 +648,22 @@ fun buildConfig(
                 PackageCache[pkg]?.let { uid -> uids.add(uid) }
             }
 
+            // === ФИКС: НЕ БЛОКИРУЕМ САМИ СЕБЯ ===
+            val appUid = android.os.Process.myUid()
+            if (!bypass) {
+                // Если режим "Проксировать выбранные", добавляем NekoBox в разрешенные (чтобы обновлять подписки)
+                if (!uids.contains(appUid)) uids.add(appUid)
+            } else {
+                // Если режим "Обходить выбранные", убираем NekoBox из заблокированных (на всякий случай)
+                uids.remove(appUid)
+            }
+            // =====================================
+
             if (uids.isNotEmpty()) {
                 route.rules.add(0, Rule_DefaultOptions().apply {
-                    inbound = listOf("tun-in") // ВАЖНО: Следим только за трафиком из TUN (чтобы не сломать раздачу по LAN)
+                
+                    source_ip_cidr = listOf("127.0.0.0/8", "::1/128", "172.19.0.0/28", "fdfe:dcba:9876::/126")
+
                     if (bypass) {
                         user_id = uids // Приложение в обходе лезет в VPN -> Блокируем
                     } else {
@@ -657,6 +674,11 @@ fun buildConfig(
                 })
             }
         }
+
+        route.rules.add(Rule_DefaultOptions().apply {
+            port = listOf(853)
+            outbound = TAG_DIRECT
+        })
 
         if (DataStore.strictLeakProtection) {
             route.rules.add(Rule_DefaultOptions().apply {

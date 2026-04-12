@@ -171,6 +171,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         directDns.onPreferenceChangeListener = reloadListener
         enableDnsRouting.onPreferenceChangeListener = reloadListener
 
+        val useLocalDns = findPreference<SwitchPreference>("useLocalDns")!!
+        useLocalDns.onPreferenceChangeListener = reloadListener
+
         ipv6Mode.onPreferenceChangeListener = reloadListener
 
         // === ПРЕДУПРЕЖДЕНИЯ ДЛЯ ЛОКАЛЬНОГО ПОРТА ===
