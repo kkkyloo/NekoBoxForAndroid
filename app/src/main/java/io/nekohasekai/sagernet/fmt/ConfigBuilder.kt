@@ -245,9 +245,7 @@ fun buildConfig(
                 }
             })
 
-            val needLocalPort = !isVPN || DataStore.allowAccess || DataStore.enableLocalProxyInVpn
-
-            if (needLocalPort) {
+            if (!isVPN) { 
                 inbounds.add(Inbound_MixedOptions().apply {
                     type = "mixed"
                     tag = TAG_MIXED
@@ -661,9 +659,6 @@ fun buildConfig(
 
             if (uids.isNotEmpty()) {
                 route.rules.add(0, Rule_DefaultOptions().apply {
-                
-                    inbound = listOf("tun-in") 
-
                     if (bypass) {
                         user_id = uids // Приложение в обходе лезет в VPN -> Блокируем
                     } else {

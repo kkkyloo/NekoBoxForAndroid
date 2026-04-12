@@ -383,25 +383,25 @@ class BaseService {
                     data.binder.missingPlugin(e.plugin)
                     stopRunner(false, null)
                 } catch (exc: Throwable) {
-                    // Извлекаем текст ошибки
-                    var errorMsg = exc.readableMessage
 
-                    // Проверяем, связана ли ошибка с отсутствием GEO-баз
-                    if (errorMsg.contains("geosite", ignoreCase = true) || errorMsg.contains("geoip", ignoreCase = true)) {
-                        errorMsg = "Базы маршрутов не найдены! Зайдите в Маршруты -> Три точки -> Управление ресурсами и обновите их."
-                    }
+
+
+
+
+
+
 
                     if (exc.javaClass.name.endsWith("proxyerror")) {
-                        // Логируем ошибку из ядра (Golang)
-                        Logs.w(errorMsg)
+                        // error from golang
+                        Logs.w(exc.readableMessage)
                     } else {
-                        // Логируем системную ошибку
+
                         Logs.w(exc)
                     }
 
-                    // Останавливаем запуск и выводим пользователю понятный текст
+
                     stopRunner(
-                        false, "${getString(R.string.service_failed)}: $errorMsg"
+                        false, "${getString(R.string.service_failed)}: ${exc.readableMessage}"
                     )
                 } finally {
                     data.connectingJob = null
