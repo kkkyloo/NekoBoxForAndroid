@@ -87,9 +87,29 @@ class MainActivity : ThemedActivity(),
         }
 
         binding.fab.setOnClickListener {
-            if (DataStore.serviceState.canStop) SagerNet.stopService() else connect.launch(
-                null
-            )
+            if (DataStore.serviceState.canStop) {
+                SagerNet.stopService()
+            } else {
+                // ПРОВЕРКА БАЗ ПЕРЕД ЗАПУСКОМ VPN
+                val filesDir = getExternalFilesDir(null) ?: filesDir
+                val geoip = java.io.File(filesDir, "geoip.db")
+                val geosite = java.io.File(filesDir, "geosite.db")
+
+                if (!geoip.exists() || !geosite.exists()) {
+                    // Баз нет! Показываем красивое окно и отправляем качать
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle("Требуется обновление баз")
+                        .setMessage("Для работы встроенных правил обхода РФ (geosite/geoip) необходимо скачать базы маршрутизации.\n\nПожалуйста, нажмите «Скачать», а затем нажмите на иконки облака ☁️ напротив файлов geoip.db и geosite.db.")
+                        .setPositiveButton("Скачать") { _, _ ->
+                            startActivity(Intent(this, AssetsActivity::class.java))
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+                } else {
+                    // Базы есть, запускаем VPN
+                    connect.launch(null)
+                }
+            }
         }
         binding.stats.setOnClickListener { if (DataStore.serviceState.connected) binding.stats.testConnection() }
 

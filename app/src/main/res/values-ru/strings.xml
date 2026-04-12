@@ -25,7 +25,8 @@
 <string name="add_profile_methods_manual_settings">Ручные настройки</string>
 <string name="add_profile_methods_scan_qr_code">Отсканировать QR-код</string>
 <string name="ads">Реклама</string>
-<string name="allow_access">Разрешить подключения из локальной сети</string>
+<string name="allow_access"><font color="#D32F2F">Разрешить LAN подключения (Опасно)</font></string>
+<string name="require_http"><font color="#D32F2F">Включить системный HTTP-прокси (Опасно)</font></string>
 <string name="allow_access_sum">Привязать входящие серверы к 0.0.0.0</string>
 <string name="allow_insecure">Разрешить небезопасное подключение</string>
 <string name="allow_insecure_on_request_sum">Отключить проверку сертификатов при обновлении подписок</string>

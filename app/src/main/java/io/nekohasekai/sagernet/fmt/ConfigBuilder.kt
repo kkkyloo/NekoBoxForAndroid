@@ -160,7 +160,7 @@ fun buildConfig(
             clash_api = ClashAPIOptions().apply {
                 external_controller = "127.0.0.1:9090"
                 external_ui = "../files/yacd"
-                secret = DataStore.clashApiSecret 
+                secret = DataStore.clashApiSecret
             }
         }
 
@@ -196,7 +196,20 @@ fun buildConfig(
 
         inbounds = mutableListOf()
 
+
+
         if (!forTest) {
+
+            val proxyApps = DataStore.proxyApps
+            val bypass = DataStore.bypass
+            val uids = mutableListOf<Int>()
+
+            if (proxyApps) {
+                DataStore.individual.split('\n').filter { it.isNotBlank() }.forEach { pkg ->
+                    PackageCache[pkg]?.let { uid -> uids.add(uid) }
+                }
+            }
+
             if (isVPN) inbounds.add(Inbound_TunOptions().apply {
                 type = "tun"
                 tag = "tun-in"
@@ -209,14 +222,18 @@ fun buildConfig(
                 mtu = DataStore.mtu
                 domain_strategy = genDomainStrategy(DataStore.resolveDestination)
                 sniff = needSniff
-                sniff_override_destination = false 
+                sniff_override_destination = false
+
+
                 when (ipv6Mode) {
                     IPv6Mode.DISABLE -> {
                         inet4_address = listOf(VpnService.PRIVATE_VLAN4_CLIENT + "/28")
                     }
+
                     IPv6Mode.ONLY -> {
                         inet6_address = listOf(VpnService.PRIVATE_VLAN6_CLIENT + "/126")
                     }
+
                     else -> {
                         inet4_address = listOf(VpnService.PRIVATE_VLAN4_CLIENT + "/28")
                         inet6_address = listOf(VpnService.PRIVATE_VLAN6_CLIENT + "/126")
@@ -224,22 +241,25 @@ fun buildConfig(
                 }
             })
 
-            if (!isVPN) { // УБРАЛИ DataStore.enableLocalProxyInVpn. В режиме VPN порт больше не открывается!
-    inbounds.add(Inbound_MixedOptions().apply {
-        type = "mixed"
-        tag = TAG_MIXED
-        listen = bind
-        listen_port = DataStore.mixedPort
+            val needLocalPort = !isVPN || DataStore.allowAccess || DataStore.enableLocalProxyInVpn
+
+            if (needLocalPort) {
+                inbounds.add(Inbound_MixedOptions().apply {
+                    type = "mixed"
+                    tag = TAG_MIXED
+                    listen = bind
+                    listen_port = DataStore.mixedPort
                     domain_strategy = genDomainStrategy(DataStore.resolveDestination)
                     sniff = needSniff
                     sniff_override_destination = needSniffOverride
-                    
+
                     users = listOf(SingBoxOptions.User().apply {
                         username = DataStore.mixedUsername
                         password = DataStore.mixedPassword
                     })
                 })
             }
+
         }
 
         outbounds = mutableListOf()
@@ -456,6 +476,7 @@ fun buildConfig(
                     }
                 }
 
+
                 outbounds.add(currentOutbound)
                 chainOutbounds.add(currentOutbound)
                 pastOutbound = currentOutbound
@@ -613,6 +634,35 @@ fun buildConfig(
         // 对 rule_set tag 去重
         if (route.rule_set != null) {
             route.rule_set = route.rule_set.distinctBy { it.tag }
+        }
+
+        if (!forTest && DataStore.proxyApps && android.os.Build.VERSION.SDK_INT >= 29) {
+            route.find_process = true // Заставляем ядро распознавать UID пакетов
+            val bypass = DataStore.bypass
+            val uids = mutableListOf<Int>()
+            DataStore.individual.split('\n').filter { it.isNotBlank() }.forEach { pkg ->
+                PackageCache[pkg]?.let { uid -> uids.add(uid) }
+            }
+
+            if (uids.isNotEmpty()) {
+                route.rules.add(0, Rule_DefaultOptions().apply {
+                    inbound = listOf("tun-in") // ВАЖНО: Следим только за трафиком из TUN (чтобы не сломать раздачу по LAN)
+                    if (bypass) {
+                        user_id = uids // Приложение в обходе лезет в VPN -> Блокируем
+                    } else {
+                        invert = true
+                        user_id = uids // Разрешены ТОЛЬКО выбранные, а лезет чужой -> Блокируем
+                    }
+                    outbound = TAG_BLOCK
+                })
+            }
+        }
+
+        if (DataStore.strictLeakProtection) {
+            route.rules.add(Rule_DefaultOptions().apply {
+                ip_cidr = listOf("0.0.0.0/0", "::/0")
+                outbound = TAG_BLOCK
+            })
         }
 
         for (freedom in arrayOf(TAG_DIRECT, TAG_BYPASS)) outbounds.add(Outbound().apply {

@@ -189,28 +189,43 @@
             app:title="@string/enable_fakedns" />
     </PreferenceCategory>
 
-    <PreferenceCategory 
-        app:title="@string/inbound_settings"
-        app:isPreferenceVisible="false">
+    <PreferenceCategory app:title="@string/inbound_settings">
         
         <SwitchPreference
             app:key="enableLocalProxyInVpn"
-            app:isPreferenceVisible="false" />
-        <EditTextPreference
-            app:key="mixedPort"
-            app:isPreferenceVisible="false" />
-        <EditTextPreference
-            app:key="mixedUsername"
-            app:isPreferenceVisible="false" />
-        <EditTextPreference
-            app:key="mixedPassword"
-            app:isPreferenceVisible="false" />
+            app:title="@string/require_http"
+            app:summary="Внедрить HTTP-прокси в настройки Wi-Fi/LTE" />
+
         <SwitchPreference
             app:key="appendHttpProxy"
-            app:isPreferenceVisible="false" />
+            app:title="@string/append_http_proxy"
+            app:summary="@string/append_http_proxy_sum"
+            app:icon="@drawable/ic_baseline_http_24" />
+
         <SwitchPreference
             app:key="allowAccess"
-            app:isPreferenceVisible="false" /> 
+            app:title="@string/allow_access"
+            app:summary="@string/allow_access_sum"
+            app:icon="@drawable/baseline_public_24" /> 
+
+        <EditTextPreference
+            app:icon="@drawable/ic_maps_directions_boat"
+            app:key="mixedPort"
+            app:title="@string/port_proxy"
+            app:useSimpleSummaryProvider="true" />
+            
+        <EditTextPreference
+            app:defaultValue="User"
+            app:key="mixedUsername"
+            app:title="Логин для прокси"
+            app:useSimpleSummaryProvider="true" />
+            
+        <EditTextPreference
+            app:icon="@drawable/ic_settings_password"
+            app:key="mixedPassword"
+            app:title="Пароль для прокси"
+            app:useSimpleSummaryProvider="true" />
+            
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_misc">
