@@ -662,7 +662,7 @@ fun buildConfig(
             if (uids.isNotEmpty()) {
                 route.rules.add(0, Rule_DefaultOptions().apply {
                 
-                    source_ip_cidr = listOf("127.0.0.0/8", "::1/128", "172.19.0.0/28", "fdfe:dcba:9876::/126")
+                    inbound = listOf("tun-in") 
 
                     if (bypass) {
                         user_id = uids // Приложение в обходе лезет в VPN -> Блокируем
