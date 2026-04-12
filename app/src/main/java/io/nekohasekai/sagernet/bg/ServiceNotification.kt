@@ -53,7 +53,7 @@ class ServiceNotification(
         }
     }
 
-   // var listenPostSpeed = true
+    var listenPostSpeed = false
 
     suspend fun postNotificationSpeedUpdate(stats: SpeedDisplayData) {
     // Speed updates removed: continuous notify() calls were causing
@@ -105,10 +105,6 @@ class ServiceNotification(
         Theme.apply(service)
         builder.color = service.getColorAttr(R.attr.colorPrimary)
 
-        service.registerReceiver(this, IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_ON)
-            addAction(Intent.ACTION_SCREEN_OFF)
-        })
 
         runOnMainDispatcher {
             updateActions()
@@ -178,7 +174,7 @@ class ServiceNotification(
     }
 
     fun destroy() {
-        listenPostSpeed = false
+     //   listenPostSpeed = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             (service as Service).stopForeground(Service.STOP_FOREGROUND_REMOVE)
         } else {
