@@ -160,7 +160,7 @@ fun buildConfig(
     }
 
     return MyOptions().apply {
-        if (!forTest && DataStore.enableClashAPI) experimental = ExperimentalOptions().apply {
+        if (!forTest && DataStore.enableClashAPI && !isVPN) experimental = ExperimentalOptions().apply {
             clash_api = ClashAPIOptions().apply {
                 external_controller = "127.0.0.1:9090"
                 external_ui = "../files/yacd"
@@ -245,7 +245,7 @@ fun buildConfig(
                 }
             })
 
-            val needLocalPort = !isVPN || DataStore.allowAccess || DataStore.enableLocalProxyInVpn
+            val needLocalPort = !isVPN
 
             if (needLocalPort) {
                 inbounds.add(Inbound_MixedOptions().apply {
@@ -661,9 +661,6 @@ fun buildConfig(
 
             if (uids.isNotEmpty()) {
                 route.rules.add(0, Rule_DefaultOptions().apply {
-                
-                    source_ip_cidr = listOf("127.0.0.0/8", "::1/128", "172.19.0.0/28", "fdfe:dcba:9876::/126")
-
                     if (bypass) {
                         user_id = uids // Приложение в обходе лезет в VPN -> Блокируем
                     } else {
