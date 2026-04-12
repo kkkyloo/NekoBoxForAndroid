@@ -96,14 +96,6 @@
             app:title="@string/custom_config"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
-    <PreferenceCategory app:title="Безопасность (Анти-утечка)">
-        <SwitchPreference
-            app:key="strictLeakProtection"
-            app:title="Блокировать прямые IP"
-            app:summary="Запрещает весь IP-трафик, не попавший под правила (защита от curl --interface tun0 и шпионских SDK)"
-            app:defaultValue="false"
-            app:icon="@drawable/ic_baseline_security_24" />
-    </PreferenceCategory>
     <PreferenceCategory app:title="@string/cag_route">
         <SwitchPreference
             app:icon="@drawable/ic_navigation_apps"

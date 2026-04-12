@@ -675,13 +675,6 @@ fun buildConfig(
             outbound = TAG_DIRECT
         })
 
-        if (DataStore.strictLeakProtection) {
-            route.rules.add(Rule_DefaultOptions().apply {
-                ip_cidr = listOf("0.0.0.0/0", "::/0")
-                outbound = TAG_BLOCK
-            })
-        }
-
         for (freedom in arrayOf(TAG_DIRECT, TAG_BYPASS)) outbounds.add(Outbound().apply {
             tag = freedom
             type = "direct"

@@ -38,9 +38,9 @@ import kotlinx.coroutines.sync.withLock
  * See also: https://github.com/aosp-mirror/platform_frameworks_base/commit/070d142993403cc2c42eca808ff3fafcee220ac4
  */
 class ServiceNotification(
-    private val service: BaseService.Interface, title: String,
-    channel: String, visible: Boolean = false,
-) : BroadcastReceiver() {
+       private val service: BaseService.Interface, title: String,
+       channel: String, visible: Boolean = false,
+   ) {
     companion object {
         const val notificationId = 1
         val flags =
@@ -53,46 +53,14 @@ class ServiceNotification(
         }
     }
 
-    var listenPostSpeed = true
+   // var listenPostSpeed = true
 
     suspend fun postNotificationSpeedUpdate(stats: SpeedDisplayData) {
-        useBuilder {
-            if (showDirectSpeed) {
-                val speedDetail = (service as Context).getString(
-                    R.string.speed_detail, service.getString(
-                        R.string.speed, Formatter.formatFileSize(service, stats.txRateProxy)
-                    ), service.getString(
-                        R.string.speed, Formatter.formatFileSize(service, stats.rxRateProxy)
-                    ), service.getString(
-                        R.string.speed,
-                        Formatter.formatFileSize(service, stats.txRateDirect)
-                    ), service.getString(
-                        R.string.speed,
-                        Formatter.formatFileSize(service, stats.rxRateDirect)
-                    )
-                )
-                it.setStyle(NotificationCompat.BigTextStyle().bigText(speedDetail))
-                it.setContentText(speedDetail)
-            } else {
-                val speedSimple = (service as Context).getString(
-                    R.string.traffic, service.getString(
-                        R.string.speed, Formatter.formatFileSize(service, stats.txRateProxy)
-                    ), service.getString(
-                        R.string.speed, Formatter.formatFileSize(service, stats.rxRateProxy)
-                    )
-                )
-                it.setContentText(speedSimple)
-            }
-            it.setSubText(
-                service.getString(
-                    R.string.traffic,
-                    Formatter.formatFileSize(service, stats.txTotal),
-                    Formatter.formatFileSize(service, stats.rxTotal)
-                )
-            )
-        }
-        update()
-    }
+    // Speed updates removed: continuous notify() calls were causing
+    // screen wake events on some OEMs (Realme/ColorOS).
+    // Foreground service stays alive via the initial show(), no further
+    // notification rebuilds are needed.
+}
 
     suspend fun postNotificationTitle(newTitle: String) {
         useBuilder {
@@ -177,11 +145,11 @@ class ServiceNotification(
         }
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
-        if (service.data.state == BaseService.State.Connected) {
-            listenPostSpeed = intent.action == Intent.ACTION_SCREEN_ON
-        }
-    }
+  //  override fun onReceive(context: Context, intent: Intent) {
+  //      if (service.data.state == BaseService.State.Connected) {
+ //           listenPostSpeed = intent.action == Intent.ACTION_SCREEN_ON
+  //      }
+ //   }
 
 
     private suspend fun show() =
@@ -216,6 +184,6 @@ class ServiceNotification(
         } else {
             (service as Service).stopForeground(true)
         }
-        service.unregisterReceiver(this)
+    //    service.unregisterReceiver(this)
     }
 }
