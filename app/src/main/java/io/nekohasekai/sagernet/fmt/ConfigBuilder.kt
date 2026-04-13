@@ -160,7 +160,7 @@ fun buildConfig(
     }
 
     return MyOptions().apply {
-        if (!forTest && DataStore.enableClashAPI && !isVPN) experimental = ExperimentalOptions().apply {
+        if (!forTest && DataStore.enableClashAPI) experimental = ExperimentalOptions().apply {
             clash_api = ClashAPIOptions().apply {
                 external_controller = "127.0.0.1:9090"
                 external_ui = "../files/yacd"
@@ -226,8 +226,7 @@ fun buildConfig(
                 mtu = DataStore.mtu
                 domain_strategy = genDomainStrategy(DataStore.resolveDestination)
                 sniff = needSniff
-                sniff_override_destination = false
-
+                sniff_override_destination = needSniffOverride
 
                 when (ipv6Mode) {
                     IPv6Mode.DISABLE -> {
@@ -245,9 +244,7 @@ fun buildConfig(
                 }
             })
 
-            val needLocalPort = !isVPN
-
-            if (needLocalPort) {
+            if (!isVPN) { 
                 inbounds.add(Inbound_MixedOptions().apply {
                     type = "mixed"
                     tag = TAG_MIXED
@@ -674,15 +671,8 @@ fun buildConfig(
 
         route.rules.add(Rule_DefaultOptions().apply {
             port = listOf(853)
-            outbound = TAG_DIRECT
+            outbound = TAG_PROXY
         })
-
-        if (DataStore.strictLeakProtection) {
-            route.rules.add(Rule_DefaultOptions().apply {
-                ip_cidr = listOf("0.0.0.0/0", "::/0")
-                outbound = TAG_BLOCK
-            })
-        }
 
         for (freedom in arrayOf(TAG_DIRECT, TAG_BYPASS)) outbounds.add(Outbound().apply {
             tag = freedom
@@ -816,16 +806,34 @@ fun buildConfig(
 
         if (!forTest) _hack_custom_config = DataStore.globalCustomConfig
     }.let {
-        val configMap = it.asMap()
-        Util.mergeJSON(configMap, proxy.requireBean().customConfigJson)
-        ConfigBuildResult(
-            gson.toJson(configMap),
-            externalIndexMap,
-            proxy.id,
-            trafficMap,
-            tagMap,
-            if (buildSelector) group.id else -1L
-        )
+    val configMap = it.asMap()
+    Util.mergeJSON(configMap, proxy.requireBean().customConfigJson)
+    
+    // === HARDENING: запрет на инжект inbounds через customConfigJson ===
+    // Защита от случая, когда пользовательский JSON (per-server или global)
+    // добавляет в финальный конфиг inbound типа mixed/socks/http и т.п.
+    // В VPN-режиме разрешены только tun (наш основной интерфейс) и direct
+    // (нужен для plugin-external протоколов вроде hysteria-plugin/naive).
+    // Всё остальное вырезаем — это вектор детектирования RKN Hardering и
+    // эксплойта из статьи runetfreedom (per-app split tunnel bypass).
+    if (!forTest) {
+        @Suppress("UNCHECKED_CAST")
+        val inboundsList = configMap["inbounds"] as? MutableList<MutableMap<String, Any?>>
+        inboundsList?.removeAll { inbound ->
+            val type = inbound["type"] as? String
+            type != null && type != "tun" && type != "direct"
+        }
     }
+    // === END HARDENING ===
+    
+    ConfigBuildResult(
+        gson.toJson(configMap),
+        externalIndexMap,
+        proxy.id,
+        trafficMap,
+        tagMap,
+        if (buildSelector) group.id else -1L
+    )
+}
 
 }

@@ -66,7 +66,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val mixedUsername = findPreference<EditTextPreference>(Key.MIXED_USERNAME)!!
         val mixedPassword = findPreference<EditTextPreference>(Key.MIXED_PASSWORD)!!
         val serviceMode = findPreference<Preference>(Key.SERVICE_MODE)!!
-        val allowAccess = findPreference<SwitchPreference>(Key.ALLOW_ACCESS)!!
+        val allowAccess = findPreference<Preference>(Key.ALLOW_ACCESS)!!
         val appendHttpProxy = findPreference<SwitchPreference>(Key.APPEND_HTTP_PROXY)!!
         appendHttpProxy.isEnabled = DataStore.enableLocalProxyInVpn 
         enableLocalProxyInVpn.setOnPreferenceChangeListener { _, newValue ->
@@ -157,6 +157,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         mixedPort.onPreferenceChangeListener = reloadListener
+        enableLocalProxyInVpn.onPreferenceChangeListener = reloadListener
         mixedUsername.onPreferenceChangeListener = reloadListener
         mixedPassword.onPreferenceChangeListener = reloadListener
         appendHttpProxy.onPreferenceChangeListener = reloadListener
@@ -171,50 +172,47 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         directDns.onPreferenceChangeListener = reloadListener
         enableDnsRouting.onPreferenceChangeListener = reloadListener
 
-        val useLocalDns = findPreference<SwitchPreference>("useLocalDns")!!
-        useLocalDns.onPreferenceChangeListener = reloadListener
-
         ipv6Mode.onPreferenceChangeListener = reloadListener
+        allowAccess.onPreferenceChangeListener = reloadListener
 
-        // === ПРЕДУПРЕЖДЕНИЯ ДЛЯ ЛОКАЛЬНОГО ПОРТА ===
-        allowAccess.setOnPreferenceChangeListener { _, newValue ->
-            if (newValue as Boolean) {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("⚠️ Угроза деанонимизации!")
-                    .setMessage("Открытие локального порта позволит раздавать VPN по Wi-Fi, но создаст обходной путь для шпионских приложений.\n\nОни смогут подключиться к локальному порту и узнать ваш VPN IP, минуя защиту TUN-интерфейса.\n\nВключайте только для раздачи VPN!")
-                    .setPositiveButton("Включить (Опасно)") { _, _ ->
-                        allowAccess.isChecked = true
-                        reloadListener.onPreferenceChange(allowAccess, true)
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show()
-                false // Не переключать свитч сразу, ждем подтверждения
-            } else {
-                reloadListener.onPreferenceChange(allowAccess, false)
-                true // Разрешаем выключить мгновенно
-            }
-        }
 
-        enableLocalProxyInVpn.setOnPreferenceChangeListener { _, newValue ->
-            if (newValue as Boolean) {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("⚠️ Риск утечки IP!")
-                    .setMessage("Внедрение HTTP-прокси в систему требует открытия локального порта (как и настройка выше). Это позволяет вредоносам обойти изоляцию туннеля.\n\nВключайте только если у вас проблемы с загрузкой некоторых сайтов в браузере.")
-                    .setPositiveButton("Включить (Опасно)") { _, _ ->
-                        enableLocalProxyInVpn.isChecked = true
-                        appendHttpProxy.isEnabled = true
-                        reloadListener.onPreferenceChange(enableLocalProxyInVpn, true)
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show()
-                false
-            } else {
-                appendHttpProxy.isEnabled = false
-                reloadListener.onPreferenceChange(enableLocalProxyInVpn, false)
-                true
-            }
-        }
-        // ===========================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         resolveDestination.onPreferenceChangeListener = reloadListener
