@@ -96,6 +96,10 @@ object ProfileManager {
         }
     }
 
+    suspend fun updateTraffic(profileId: Long, rx: Long, tx: Long) {
+        SagerDatabase.proxyDao.updateTraffic(profileId, rx, tx)
+    }
+
     suspend fun deleteProfile2(groupId: Long, profileId: Long) {
         if (SagerDatabase.proxyDao.deleteById(profileId) == 0) return
         if (DataStore.selectedProxy == profileId) {
@@ -205,7 +209,6 @@ object ProfileManager {
             )
 
             // 3. Обход для RU доменов (идут напрямую)
-            createRule(
             RuleEntity(
                 name = "Bypass RU Domains",
                 domains = listOf(
@@ -250,6 +253,37 @@ object ProfileManager {
                 ), false
             )
 
+            val fuckedCountry = mutableListOf("cn:中国")
+            if (Locale.getDefault().country != Locale.CHINA.country) {
+                // 非中文用户
+                fuckedCountry += "ir:Iran"
+                fuckedCountry += "ru:Russia"
+            }
+            for (c in fuckedCountry) {
+                val country = c.substringBefore(":")
+                val displayCountry = c.substringAfter(":")
+                //
+                if (country == "cn") createRule(
+                    RuleEntity(
+                        name = app.getString(R.string.route_play_store, displayCountry),
+                        domains = "domain:googleapis.cn\ndomain:xn--ngstr-lra8j.com\ndomain:xn--ngstr-cn-8za9o.com",
+                    ), false
+                )
+                createRule(
+                    RuleEntity(
+                        name = app.getString(R.string.route_bypass_domain, displayCountry),
+                        domains = "geosite:$country",
+                        outbound = -1
+                    ), false
+                )
+                createRule(
+                    RuleEntity(
+                        name = app.getString(R.string.route_bypass_ip, displayCountry),
+                        ip = "geoip:$country",
+                        outbound = -1
+                    ), false
+                )
+            }
             rules = SagerDatabase.rulesDao.allRules()
         }
         return rules

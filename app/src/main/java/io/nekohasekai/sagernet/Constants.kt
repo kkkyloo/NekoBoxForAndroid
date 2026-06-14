@@ -1,6 +1,6 @@
 package io.nekohasekai.sagernet
 
-const val CONNECTION_TEST_URL = "http://cp.cloudflare.com/"
+const val CONNECTION_TEST_URL = "http://www.gstatic.com/generate_204"
 
 object Key {
 
@@ -9,9 +9,12 @@ object Key {
 
     const val PERSIST_ACROSS_REBOOT = "isAutoConnect"
 
+    const val CLEAR_CACHE = "clearCache"
+
     const val APP_EXPERT = "isExpert"
     const val APP_THEME = "appTheme"
     const val NIGHT_THEME = "nightTheme"
+    const val APP_LANGUAGE = "appLanguage"
     const val SERVICE_MODE = "serviceMode"
     const val MODE_VPN = "vpn"
     const val MODE_PROXY = "proxy"
@@ -35,18 +38,22 @@ object Key {
 
     const val BYPASS_LAN = "bypassLan"
     const val BYPASS_LAN_IN_CORE = "bypassLanInCore"
+    const val CONCURRENT_DIAL = "concurrentDial"
 
     const val MIXED_PORT = "mixedPort"
     const val ENABLE_LOCAL_PROXY_IN_VPN = "enableLocalProxyInVpn"
     const val MIXED_USERNAME = "mixedUsername"
     const val MIXED_PASSWORD = "mixedPassword"
+    const val MIXED_SECRET = "mixedSecret" // storage key for the generated inbound secret
     const val ALLOW_ACCESS = "allowAccess"
     const val SPEED_INTERVAL = "speedInterval"
     const val SHOW_DIRECT_SPEED = "showDirectSpeed"
 
     const val APPEND_HTTP_PROXY = "appendHttpProxy"
+    const val STRICT_ROUTE = "strictRoute"
 
     const val CONNECTION_TEST_URL = "connectionTestURL"
+    const val CONNECTION_TEST_TIMEOUT = "connectionTestTimeout"
 
     const val NETWORK_CHANGE_RESET_CONNECTIONS = "networkChangeResetConnections"
     const val WAKE_RESET_CONNECTIONS = "wakeResetConnections"
@@ -56,11 +63,18 @@ object Key {
     const val MTU = "mtu"
     const val ALWAYS_SHOW_ADDRESS = "alwaysShowAddress"
 
+    const val RULES_GEOSITE_URL = "rulesGeositeUrl"
+    const val RULES_GEOIP_URL = "rulesGeoipUrl"
+    const val RULES_UPDATE_INTERVAL = "rulesUpdateInterval"
+
     // Protocol Settings
     const val GLOBAL_ALLOW_INSECURE = "globalAllowInsecure"
 
     const val ACQUIRE_WAKE_LOCK = "acquireWakeLock"
+    const val HIDE_FROM_RECENT_APPS = "hideFromRecentApps"
     const val SHOW_BOTTOM_BAR = "showBottomBar"
+    const val CONFIRM_PROFILE_DELETE = "confirmProfileDelete"
+    const val GROUP_LAYOUT_MODE = "groupLayoutMode"
 
     const val ALLOW_INSECURE_ON_REQUEST = "allowInsecureOnRequest"
 
@@ -84,6 +98,9 @@ object Key {
 
     const val SERVER_PROTOCOL = "serverProtocol"
     const val SERVER_OBFS = "serverObfs"
+
+    const val SERVER_PROTOCOL_PARAM = "serverProtocolParam"
+    const val SERVER_OBFS_PARAM = "serverObfsParam"
 
     const val SERVER_NETWORK = "serverNetwork"
     const val SERVER_HOST = "serverHost"
@@ -122,6 +139,9 @@ object Key {
     const val SERVER_DISABLE_SNI = "serverDisableSNI"
     const val SERVER_REDUCE_RTT = "serverReduceRTT"
 
+    const val SERVER_USER_ID = "serverUserId"
+    const val SERVER_PINNED_CERT_CHAIN_SHA256 = "serverPinnedCertChainSha256"
+
     const val ROUTE_NAME = "routeName"
     const val ROUTE_DOMAIN = "routeDomain"
     const val ROUTE_IP = "routeIP"
@@ -130,6 +150,7 @@ object Key {
     const val ROUTE_NETWORK = "routeNetwork"
     const val ROUTE_SOURCE = "routeSource"
     const val ROUTE_PROTOCOL = "routeProtocol"
+    const val ROUTE_RULESET = "routeRuleset"
     const val ROUTE_OUTBOUND = "routeOutbound"
     const val ROUTE_PACKAGES = "routePackages"
 
@@ -149,6 +170,8 @@ object Key {
     const val SUBSCRIPTION_USER_AGENT = "subscriptionUserAgent"
     const val SUBSCRIPTION_AUTO_UPDATE = "subscriptionAutoUpdate"
     const val SUBSCRIPTION_AUTO_UPDATE_DELAY = "subscriptionAutoUpdateDelay"
+    const val SUBSCRIPTION_FILTER_MODE = "subscriptionFilterMode"
+    const val SUBSCRIPTION_FILTER_REGEX = "subscriptionFilterRegex"
 
     //
 
@@ -159,6 +182,17 @@ object Key {
     const val VPN_WATCHDOG_ENABLED = "vpnWatchdogEnabled"
     const val VPN_WATCHDOG_INTERVAL = "vpnWatchdogInterval"
 
+    const val ENABLE_TLS_FRAGMENT = "enableTLSFragment"
+
+    const val FRAGMENT_LENGTH = "fragmentLength"
+    const val FRAGMENT_INTERVAL = "fragmentInterval"
+
+    const val WEBDAV_SERVER = "webdavServer"
+    const val WEBDAV_USERNAME = "webdavUsername"
+    const val WEBDAV_PASSWORD = "webdavPassword"
+    const val WEBDAV_PATH = "webdavPath"
+
+    const val GLOBAL_MODE = "globalMode"
 }
 
 object TunImplementation {
@@ -183,6 +217,12 @@ object GroupOrder {
     const val ORIGIN = 0
     const val BY_NAME = 1
     const val BY_DELAY = 2
+}
+
+object SubscriptionFilterMode {
+    const val DISABLED = 0
+    const val INCLUDE = 1
+    const val EXCLUDE = 2
 }
 
 object Action {

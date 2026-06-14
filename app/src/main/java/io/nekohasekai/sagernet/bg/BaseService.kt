@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.*
+import android.app.ActivityManager
 import android.widget.Toast
 import io.nekohasekai.sagernet.Action
 import io.nekohasekai.sagernet.BootReceiver
@@ -145,7 +146,7 @@ class BaseService {
             }
             try {
                 return Libcore.urlTest(
-                    data!!.proxy!!.box, DataStore.connectionTestURL, 3000
+                    data!!.proxy!!.box, DataStore.connectionTestURL, DataStore.connectionTestTimeout
                 )
             } catch (e: Exception) {
                 error(Protocols.genFriendlyMsg(e.readableMessage))
@@ -235,6 +236,7 @@ class BaseService {
         fun stopRunner(restart: Boolean = false, msg: String? = null) {
             DataStore.baseService = null
             DataStore.vpnService = null
+            DataStore.mixedInboundAuthed = false
 
             if (data.state == State.Stopping) return
             data.notification?.destroy()

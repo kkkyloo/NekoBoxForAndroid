@@ -34,6 +34,9 @@
                         android:id="@+id/action_new_ss"
                         android:title="@string/action_shadowsocks" />
                     <item
+                        android:id="@+id/action_new_ssr"
+                        android:title="@string/action_shadowsocksr" />
+                    <item
                         android:id="@+id/action_new_vmess"
                         android:title="@string/action_vmess" />
                     <item
@@ -58,11 +61,17 @@
                         android:id="@+id/action_new_tuic"
                         android:title="@string/action_tuic" />
                     <item
+                        android:id="@+id/action_new_juicity"
+                        android:title="@string/action_juicity" />
+                    <item
                         android:id="@+id/action_new_shadowtls"
                         android:title="@string/action_shadowtls" />
                     <item
                         android:id="@+id/action_new_anytls"
                         android:title="@string/action_anytls" />
+                    <item
+                        android:id="@+id/action_new_snell"
+                        android:title="@string/action_snell" />
                     <item
                         android:id="@+id/action_new_ssh"
                         android:title="@string/action_ssh" />
@@ -108,10 +117,19 @@
                 android:id="@+id/action_connection_test_delete_unavailable"
                 android:title="@string/connection_test_delete_unavailable" />
             <item
-                android:id="@+id/action_order"
-                android:title="@string/group_order">
+                android:id="@+id/action_global_mode"
+                android:title="@string/global_mode"
+                android:checkable="true"
+                android:checked="false"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/action_order_layout"
+                android:title="@string/sort_and_layout">
                 <menu>
-                    <group android:checkableBehavior="single">
+                    <item
+                        android:title="@string/group_order"
+                        android:enabled="false" />
+                    <group android:id="@+id/order_group" android:checkableBehavior="single">
                         <item
                             android:id="@+id/action_order_origin"
                             android:title="@string/group_order_origin" />
@@ -121,6 +139,17 @@
                         <item
                             android:id="@+id/action_order_by_delay"
                             android:title="@string/group_order_by_delay" />
+                    </group>
+                    <item
+                        android:title="@string/layout"
+                        android:enabled="false" />
+                    <group android:id="@+id/layout_group" android:checkableBehavior="single">
+                        <item
+                            android:id="@+id/action_layout_single"
+                            android:title="@string/layout_single_column" />
+                        <item
+                            android:id="@+id/action_layout_double"
+                            android:title="@string/layout_double_column" />
                     </group>
                 </menu>
             </item>

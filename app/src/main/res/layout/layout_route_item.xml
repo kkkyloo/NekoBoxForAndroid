@@ -5,8 +5,7 @@
     android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardElevation="2dp">
+    android:layout_margin="4dp">
 
     <LinearLayout
         android:id="@+id/content_lin"
@@ -113,7 +112,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?attr/accentOrTextSecondary" />
+                    android:textColor="?colorSecondary" />
 
                 <TextView
                     android:layout_marginTop="4dp"
@@ -122,7 +121,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?attr/accentOrTextSecondary" />
+                    android:textColor="?colorSecondary" />
 
             </LinearLayout>
 

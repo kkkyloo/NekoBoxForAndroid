@@ -27,7 +27,9 @@ import (
 	"github.com/sagernet/sing-box/protocol/mixed"
 	"github.com/sagernet/sing-box/protocol/redirect"
 	"github.com/sagernet/sing-box/protocol/shadowsocks"
+	"github.com/sagernet/sing-box/protocol/shadowsocksr"
 	"github.com/sagernet/sing-box/protocol/shadowtls"
+	snellprotocol "github.com/sagernet/sing-box/protocol/snell"
 	"github.com/sagernet/sing-box/protocol/socks"
 	"github.com/sagernet/sing-box/protocol/ssh"
 	"github.com/sagernet/sing-box/protocol/tor"
@@ -37,6 +39,8 @@ import (
 	"github.com/sagernet/sing-box/protocol/vless"
 	"github.com/sagernet/sing-box/protocol/vmess"
 	"github.com/sagernet/sing-box/protocol/wireguard"
+
+	"libcore/protocol/juicity"
 
 	_ "github.com/sagernet/sing-box/experimental/clashapi"
 	_ "github.com/sagernet/sing-box/transport/v2rayquic"
@@ -71,6 +75,7 @@ func nekoboxAndroidOutboundRegistry() *outbound.Registry {
 	socks.RegisterOutbound(registry)
 	http.RegisterOutbound(registry)
 	shadowsocks.RegisterOutbound(registry)
+	shadowsocksr.RegisterOutbound(registry)
 	vmess.RegisterOutbound(registry)
 	trojan.RegisterOutbound(registry)
 	tor.RegisterOutbound(registry)
@@ -78,10 +83,12 @@ func nekoboxAndroidOutboundRegistry() *outbound.Registry {
 	shadowtls.RegisterOutbound(registry)
 	vless.RegisterOutbound(registry)
 	anytls.RegisterOutbound(registry)
+	snellprotocol.RegisterOutbound(registry)
 
 	hysteria.RegisterOutbound(registry)
 	tuic.RegisterOutbound(registry)
 	hysteria2.RegisterOutbound(registry)
+	juicity.RegisterOutbound(registry)
 
 	wireguard.RegisterOutbound(registry)
 

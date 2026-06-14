@@ -22,6 +22,14 @@
             app:title="@string/night_mode"
             app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:defaultValue=""
+            app:entries="@array/language_entries"
+            app:entryValues="@array/language_values"
+            app:icon="@drawable/baseline_translate_24"
+            app:key="appLanguage"
+            app:title="@string/language"
+            app:useSimpleSummaryProvider="true" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:defaultValue="vpn"
             app:entries="@array/service_modes"
             app:entryValues="@array/service_mode_values"
@@ -68,6 +76,10 @@
             app:key="showGroupInNotification"
             app:title="@string/show_group_in_notification" />
         <SwitchPreference
+            app:key="confirmProfileDelete"
+            app:defaultValue="true"
+            app:title="@string/confirm_profile_delete" />
+        <SwitchPreference
             app:icon="@drawable/ic_baseline_center_focus_weak_24"
             app:key="alwaysShowAddress"
             app:summary="@string/always_show_address_sum"
@@ -82,6 +94,10 @@
             app:key="acquireWakeLock"
             app:summary="@string/acquire_wake_lock_summary"
             app:title="@string/acquire_wake_lock" />
+        <SwitchPreference
+            app:key="hideFromRecentApps"
+            app:summary="@string/hide_from_recent_apps_summary"
+            app:title="@string/hide_from_recent_apps" />
         <moe.matsuri.nb4a.ui.LongClickListPreference
             app:defaultValue="0"
             app:entries="@array/log_level"
@@ -109,6 +125,11 @@
         <SwitchPreference
             app:key="bypassLanInCore"
             app:title="@string/bypass_lan_in_core" />
+        <SwitchPreference
+             app:icon="@drawable/ic_baseline_compare_arrows_24"
+             app:key="concurrentDial"
+             app:title="@string/concurrent_dial"
+             app:summary="@string/concurrent_dial_summary" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:defaultValue="2"
             app:entries="@array/traffic_sniffing_values"
@@ -133,16 +154,48 @@
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:defaultValue="0"
             app:entries="@array/rules_dat_provider"
-            app:entryValues="@array/int_array_4"
+            app:entryValues="@array/int_array_5"
             app:icon="@drawable/ic_baseline_rule_folder_24"
             app:key="rulesProvider"
             app:title="@string/route_rules_provider"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="https://github.com/SagerNet/sing-geosite/releases/latest/download/geosite.db"
+            app:key="rulesGeositeUrl"
+            app:title="@string/rules_geosite_url"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="https://github.com/SagerNet/sing-geoip/releases/latest/download/geoip.db"
+            app:key="rulesGeoipUrl"
+            app:title="@string/rules_geoip_url"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="0"
+            app:key="rulesUpdateInterval"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:title="@string/ruleset_update_interval"
+            app:summary="@string/ruleset_update_interval_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/fragment_settings">
+        <SwitchPreference
+            app:key="enableTLSFragment"
+            app:title="@string/enable_tls_fragment" />
+        <EditTextPreference
+            app:defaultValue="100-200"
+            app:key="fragmentLength"
+            app:title="@string/fragment_length"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="10-20"
+            app:key="fragmentInterval"
+            app:title="@string/fragment_interval"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_dns">
         <EditTextPreference
-            app:defaultValue="https://dns.google/dns-query"
+      app:defaultValue="https://dns.google/dns-query"
             app:icon="@drawable/ic_action_dns"
             app:key="remoteDns"
             app:title="@string/remote_dns"
@@ -243,6 +296,12 @@
             app:key="appendHttpProxy"
             app:isPreferenceVisible="false" />
         <SwitchPreference
+        <SwitchPreference
+            app:defaultValue="true"
+            app:key="strictRoute"
+            app:title="@string/strict_route" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_nat_24"
             app:key="allowAccess"
             app:isPreferenceVisible="false" /> 
     </PreferenceCategory>
@@ -287,6 +346,15 @@
         <SwitchPreference
             app:key="showBottomBar"
             app:title="@string/show_bottom_bar" />
+        <Preference
+            app:icon="@drawable/baseline_undo_24"
+            app:key="resetSettings"
+            app:title="@string/reset_settings" />
+        <Preference
+            app:icon="@drawable/ic_baseline_delete_24"
+            app:key="clearCache"
+            app:title="@string/clear_cache"
+            app:summary="@string/clear_cache_summary" />
     </PreferenceCategory>
 
   <PreferenceCategory

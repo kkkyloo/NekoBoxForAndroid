@@ -35,6 +35,10 @@
     <string name="update_all_subscription">Update all subscriptions</string>
     <string name="group_edit">Edit group</string>
     <string name="group_edit_subscription">Edit subscription</string>
+    <string name="layout">Layout</string>
+    <string name="layout_single_column">Single column</string>
+    <string name="layout_double_column">Double column</string>
+    <string name="sort_and_layout">Sort and Layout</string>
     <string name="group_status_empty">Empty group</string>
     <string name="group_status_empty_subscription">Not updated yet</string>
     <string name="group_status_proxies">%d Proxies</string>
@@ -68,7 +72,7 @@
     <string name="speed_interval">Speed Notification Update Interval</string>
     <string name="cag_misc">Misc Settings</string>
     <string name="show_stop">Show Stop Button</string>
-    <string name="show_stop_sum">If you don’t want to use Quick Tile as the switch</string>
+    <string name="show_stop_sum">If you don\'t want to use Quick Tile as the switch</string>
     <string name="show_direct_speed">Show Direct Speed</string>
     <string name="show_direct_speed_sum">Show the traffic speed without proxy in the notification as
         well</string>
@@ -122,6 +126,11 @@
     <string name="ws_path">WebSocket Path</string>
     <string name="http_host">HTTP Host</string>
     <string name="http_path">HTTP Path</string>
+    <string name="kcp_seed">mKCP Seed</string>
+    <string name="kcp_header_type">Header Type</string>
+    <string name="kcp_mtu">mKCP MTU</string>
+    <string name="kcp_tti">mKCP TTI</string>
+    <string name="kcp_cwnd_multiplier">CWND Multiplier</string>
     <string name="grpc_service_name">gRPC ServiceName</string>
     <string name="tls">Use TLS</string>
     <string name="sni">Server Name Indication</string>
@@ -170,7 +179,15 @@
     <string name="mux_sum">Mux is designed to reduce TCP handshake latency, not to increase
         connection throughput. Using Mux to watch videos, download or speed test is usually counter
         productive. If the server does not support it, you will not be able to access the Internet.</string>
-    <string name="mux_concurrency">Mux Concurrent Connections</string>
+    <string name="mux_concurrency">Max Streams</string>
+    <string name="mux_mode">Mode</string>
+    <string name="mux_mode_max_streams">Max Streams</string>
+    <string name="mux_mode_connections">Connections</string>
+    <string name="mux_max_connections">Max Connections</string>
+    <string name="mux_min_streams">Min Streams</string>
+    <string name="mux_brutal">TCP Brutal</string>
+    <string name="mux_brutal_up_mbps">Upload (Mbps)</string>
+    <string name="mux_brutal_down_mbps">Download (Mbps)</string>
     <string name="tcp_keep_alive_interval">TCP keep active packet delivery interval</string>
     <string name="proxied_apps">Apps VPN mode</string>
     <string name="proxied_apps_summary">Configure VPN mode for selected apps</string>
@@ -223,6 +240,7 @@
     <string name="action_ssh" translatable="false">SSH</string>
     <string name="action_wireguard" translatable="false">WireGuard</string>
     <string name="action_tuic" translatable="false">TUIC</string>
+    <string name="action_juicity" translatable="false">Juicity</string>
     <string name="proxy_chain">Proxy Chain</string>
     <string name="custom_config">Custom Config</string>
     <string name="balancer">Balancer</string>
@@ -253,6 +271,7 @@
     <string name="profile_config">Profile config</string>
     <string name="delete">Remove</string>
     <string name="delete_confirm_prompt">Are you sure you want to remove this profile?</string>
+    <string name="confirm_profile_delete">Delete profile confirmation</string>
     <string name="share_qr_nfc">QR code</string>
     <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
     <string name="add_profile_methods_manual_settings">Manual Settings</string>
@@ -305,6 +324,7 @@
         otherwise you may not be able to connect to the Internet.</string>
     <string name="lines">%d Lines</string>
     <string name="night_mode">Night Mode</string>
+    <string name="language">Language</string>
     <string name="follow_system">Follow System</string>
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
@@ -334,10 +354,14 @@
     <string name="connection_test_domain_not_found">Domain not found</string>
     <string name="connection_test_refused">Connection refused</string>
     <string name="connection_test_unreachable">Unreachable</string>
-    <string name="connection_test_timeout">Timeout</string>
+    <string name="connection_test_timeout_error">Timeout</string>
     <string name="append_http_proxy">Append HTTP Proxy to VPN</string>
     <string name="append_http_proxy_sum">HTTP proxy will be used directly from (browser/ some
         supported apps), without going through the virtual NIC device (Android 10+)</string>
+    <string name="append_http_proxy_security_title">Security Notice</string>
+    <string name="append_http_proxy_security_message">When enabled, other apps on this device can directly use the local proxy port.\n\nRecommendation: Only enable this if you trust all installed apps.</string>
+    <string name="enable_anyway">Enable Anyway</string>
+    <string name="strict_route">Strict Route</string>
     <string name="protocol_settings">Protocol Settings</string>
     <string name="trojan_provider">Trojan Provider</string>
     <string name="group_basic">Basic</string>
@@ -351,6 +375,11 @@
     <string name="force_resolve_sum">Resolve all domain names to IP addresses when updating. Host
         and SNI will be automatically appended if possible</string>
     <string name="deduplication_sum">Remove duplicate configurations when updating</string>
+    <string name="filter">Filter</string>
+    <string name="filter_disabled">Disabled</string>
+    <string name="filter_include">Include</string>
+    <string name="filter_exclude">Exclude</string>
+    <string name="filter_regex">Filter (Regex)</string>
     <string name="raw">Raw</string>
     <string name="update_settings">Update Settings</string>
     <string name="auto_update">Auto Update</string>
@@ -499,12 +528,19 @@
     <string name="acquire_wake_lock">Acquire WakeLock</string>
     <string name="release_wake_lock">Release WakeLock</string>
     <string name="acquire_wake_lock_summary">Keep the CPU on</string>
+    <string name="hide_from_recent_apps">Hide from recent tasks</string>
+    <string name="hide_from_recent_apps_summary">Hide the app from recent tasks when running in background</string>
     <string name="action_switch">Switch</string>
+    <string name="custom_rules_provider">Custom</string>
+    <string name="rules_geosite_url">geosite URL</string>
+    <string name="rules_geoip_url">geoip URL</string>
 
     <string name="tuic_udp_relay_mode">UDP Relay Mode</string>
     <string name="tuic_congestion_controller">Congestion Controller</string>
     <string name="tuic_disable_sni">Disable SNI</string>
     <string name="tuic_reduce_rtt">Enable 0-RTT QUIC handshake</string>
+
+    <string name="pinned_certchain_sha256">Pinned Certificate SHA256</string>
 
     <string name="please_update">Your APP is too old (%1$s). And will stop working at %2$s. Please
         update!</string>
@@ -564,10 +600,54 @@
     <string name="allow_insecure_on_request_sum">Disable certificate checking when updating
         subscriptions</string>
     <string name="global_allow_insecure">Always allow insecure</string>
+    <string name="fragment_settings">Fragment Settings</string>
+    <string name="enable_tls_fragment">Enable TLS Client Hello Fragment</string>
+    <string name="fragment_length">Fragment Length (min-max)</string>
+    <string name="fragment_interval">Fragment Interval (min-max)</string>
+
+    <string name="backup_local">Local Backup</string>
+    <string name="backup_webdav">WebDAV Backup</string>
+    <string name="webdav_settings">WebDAV Settings</string>
+    <string name="webdav_server">Server Address</string>
+    <string name="webdav_username">Username</string>
+    <string name="webdav_password">Password</string>
+    <string name="webdav_path">Backup Path</string>
+    <string name="webdav_test">Test Connection</string>
+    <string name="webdav_test_success">Connection Successful</string>
+    <string name="webdav_test_failed" formatted="false">Connection Failed: %s</string>
+    <string name="backup_to_webdav">Backup to WebDAV</string>
+    <string name="restore_from_webdav">Restore from WebDAV</string>
+    <string name="webdav_backup_success">Backup to WebDAV successful</string>
+    <string name="webdav_backup_failed">Backup to WebDAV failed: %s</string>
+    <string name="webdav_restore_success">Restore from WebDAV successful</string>
+    <string name="webdav_restore_failed">Restore from WebDAV failed: %s</string>
+    <string name="webdav_server_empty">Please configure WebDAV server first</string>
+    <string name="webdav_auth_error">Authentication failed: Invalid username or password</string>
+    <string name="webdav_permission_denied">Permission denied</string>
+    <string name="webdav_server_not_found">Server not found</string>
+    <string name="webdav_server_error">Server error</string>
+    <string name="webdav_connect_failed">Connection failed with code: %d</string>
+    <string name="webdav_create_dir_failed">Failed to create or access backup directory</string>
+    <string name="global_mode">Global Mode</string>
+    <string name="global_mode_summary">Bypass all routing rules and proxy all traffic through current node</string>
     <string name="mux_preference">Mulitplex</string>
     <string name="padding">Padding</string>
     <string name="network_change_reset_connections">Reset outbound connections when network changes</string>
     <string name="wake_reset_connections">Reset outbound connections when device wake from sleep</string>
+    <string name="backup_in_progress">Backup is already in progress</string>
+    <string name="restore_in_progress">Restore is already in progress</string>
+    <string name="restore_cancelled">Restore operation cancelled</string>
+    <string name="ruleset_update_interval">RuleSet Update Interval</string>
+    <string name="ruleset_update_interval_summary">Time between updates of remote RuleSets. Examples: 1h, 30m, 3600s. Set to 0 to disable automatic updates</string>
+    <string name="ruleset_prefix_error">Ruleset format error: must start with rsip: or rssite:</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="clear_cache_summary">Clear application cache files to fix some abnormal issues</string>
+    <string name="clear_cache_confirm">Are you sure you want to clear the cache?</string>
+    <string name="clear_cache_success">Cache cleared</string>
+    <string name="clear_cache_failed">Failed to clear cache: %s</string>
+    <string name="concurrent_dial">Concurrent Dial</string>
+    <string name="concurrent_dial_summary">Enable concurrent connections for faster network establishment, may increase battery usage</string>
+    <string name="connection_test_timeout">Test Timeout (ms)</string>
     <string name="preview_version_hint">This application is a preview version and may contain many problems. If you do not want to test it, please go to GitHub to download the Release version!</string>
     <string name="check_update_preview">Check for preview version updates</string>
     <string name="check_update_release">Check for release version updates</string>
@@ -577,6 +657,13 @@
     <string name="reset_settings">Restore default settings</string>
     <string name="reset_settings_message">Restore default settings, but data such as nodes and groups will be retained. To completely clear data, clear application data directly in the system settings.</string>
     <string name="minimize">Minimize</string>
+    <string name="xhttp_host">XHTTP Host</string>
+    <string name="xhttp_path">XHTTP Path</string>
+    <string name="xhttp_mode">XHTTP Mode</string>
+    <string name="xhttp_extra">XHTTP Extra</string>
+    <string name="xhttp_settings">XHTTP Settings</string>
+    <string name="vless_encryption">Encryption</string>
+    <string name="vless_encryption_hint">mlkem768x25519plus.native.0rtt.KEY1.KEY2...</string>
     <string name="app_list_permission_denied">Unable to read installed apps.\nThis is usually because the system has restricted app read permissions.\nPlease grant permissions in the system settings.</string>
     <string name="open_app_settings">Open System Settings</string>
     <string name="vpn_watchdog">Auto-reconnect</string>
@@ -584,4 +671,15 @@
     <string name="vpn_watchdog_test">\uD83E\uDDEA Test watchdog</string>
     <string name="vpn_watchdog_test_summary">Force restart VPN to test watchdog</string>
     <string name="vpn_watchdog_interval">Check interval (sec)</string>
+
+    <!-- Snell Protocol -->
+    <string name="action_snell">Snell</string>
+    <string name="snell_psk">密钥</string>
+    <string name="snell_version">版本</string>
+    <string name="snell_network">协议</string>
+    <string name="snell_obfs_mode">Obfs 模式</string>
+    <string name="snell_obfs_host">Obfs 主机</string>
+    <string name="snell_reuse">Reuse</string>
+    <string name="snell_reuse_summary">v4/v5 only</string>
+
 </resources>

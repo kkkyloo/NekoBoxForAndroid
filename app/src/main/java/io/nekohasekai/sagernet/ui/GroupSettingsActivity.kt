@@ -21,8 +21,10 @@ import io.nekohasekai.sagernet.GroupType
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.SubscriptionFilterMode
 import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
+import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
@@ -60,6 +62,8 @@ class GroupSettingsActivity(
         DataStore.subscriptionUserAgent = subscription.customUserAgent
         DataStore.subscriptionAutoUpdate = subscription.autoUpdate
         DataStore.subscriptionAutoUpdateDelay = subscription.autoUpdateDelay
+        DataStore.subscriptionFilterMode = subscription.filterMode
+        DataStore.subscriptionFilterRegex = subscription.filterRegex
     }
 
     fun ProxyGroup.serialize() {
@@ -81,13 +85,16 @@ class GroupSettingsActivity(
                 customUserAgent = DataStore.subscriptionUserAgent
                 autoUpdate = DataStore.subscriptionAutoUpdate
                 autoUpdateDelay = DataStore.subscriptionAutoUpdateDelay
+                filterMode = DataStore.subscriptionFilterMode
+                filterRegex = DataStore.subscriptionFilterRegex
             }
         }
     }
 
+    private var isFromClipboard = false
+
     fun needSave(): Boolean {
-        if (!DataStore.dirty) return false
-        return true
+        return DataStore.dirty
     }
 
     fun PreferenceFragmentCompat.createPreferences(
@@ -160,6 +167,20 @@ class GroupSettingsActivity(
             subscriptionAutoUpdateDelay.isEnabled = (newValue as Boolean)
             true
         }
+
+        val subscriptionFilterMode =
+            findPreference<SimpleMenuPreference>(Key.SUBSCRIPTION_FILTER_MODE)!!
+        val subscriptionFilterRegex =
+            findPreference<EditTextPreference>(Key.SUBSCRIPTION_FILTER_REGEX)!!
+
+        fun updateFilterMode(filterMode: Int = DataStore.subscriptionFilterMode) {
+            subscriptionFilterRegex.isVisible = filterMode != SubscriptionFilterMode.DISABLED
+        }
+        updateFilterMode()
+        subscriptionFilterMode.setOnPreferenceChangeListener { _, newValue ->
+            updateFilterMode((newValue as String).toInt())
+            true
+        }
     }
 
     class UnsavedChangesDialogFragment : AlertDialogFragment<Empty, Empty>() {
@@ -194,6 +215,8 @@ class GroupSettingsActivity(
 
     companion object {
         const val EXTRA_GROUP_ID = "id"
+        const val EXTRA_FROM_CLIPBOARD = "fromClipboard"
+        const val EXTRA_GROUP_SUBSCRIPTION_LINK = "subscription_link"
     }
 
     @SuppressLint("CommitTransaction")
@@ -208,10 +231,20 @@ class GroupSettingsActivity(
 
         if (savedInstanceState == null) {
             val editingId = intent.getLongExtra(EXTRA_GROUP_ID, 0L)
+            isFromClipboard = intent.getBooleanExtra(EXTRA_FROM_CLIPBOARD, false)
+            val subscriptionLink = intent.getStringExtra(EXTRA_GROUP_SUBSCRIPTION_LINK)
             DataStore.editingId = editingId
             runOnDefaultDispatcher {
                 if (editingId == 0L) {
-                    ProxyGroup().init()
+                    val group = ProxyGroup()
+                    group.init()
+                    
+                    // 如果有订阅链接，设置为订阅类型并填充链接
+                    if (!subscriptionLink.isNullOrEmpty()) {
+                        DataStore.groupType = GroupType.SUBSCRIPTION
+                        DataStore.subscriptionLink = subscriptionLink
+                        DataStore.dirty = true
+                    }
                 } else {
                     val entity = SagerDatabase.groupDao.getById(editingId)
                     if (entity == null) {
@@ -241,7 +274,10 @@ class GroupSettingsActivity(
 
         val editingId = DataStore.editingId
         if (editingId == 0L) {
-            GroupManager.createGroup(ProxyGroup().apply { serialize() })
+            val newGroup = GroupManager.createGroup(ProxyGroup().apply { serialize() })
+            if (isFromClipboard && newGroup.type == GroupType.SUBSCRIPTION && !newGroup.subscription?.link.isNullOrEmpty()) {
+                GroupUpdater.startUpdate(newGroup, true)
+            }
         } else if (needSave()) {
             val entity = SagerDatabase.groupDao.getById(DataStore.editingId)
             if (entity == null) {

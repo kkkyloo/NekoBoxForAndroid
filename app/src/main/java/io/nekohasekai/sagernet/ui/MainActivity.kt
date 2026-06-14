@@ -2,6 +2,8 @@ package io.nekohasekai.sagernet.ui
 
 import android.Manifest.permission.POST_NOTIFICATIONS
 import android.annotation.SuppressLint
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -48,6 +50,8 @@ import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.parseProxies
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
+import io.nekohasekai.sagernet.ui.MessageStore
+import io.nekohasekai.sagernet.ktx.Logs
 import moe.matsuri.nb4a.utils.Util
 
 class MainActivity : ThemedActivity(),
@@ -60,6 +64,7 @@ class MainActivity : ThemedActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MessageStore.setCurrentActivity(this)
 
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)
@@ -146,10 +151,31 @@ class MainActivity : ThemedActivity(),
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        MessageStore.setCurrentActivity(this)
+        
+        if (DataStore.hideFromRecentApps) {
+            applyHideFromRecentApps(DataStore.hideFromRecentApps)
+        }
+    }
+    
+    fun applyHideFromRecentApps(hide: Boolean) {
+        try {
+            val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val tasks = activityManager.appTasks
+            if (tasks.isNotEmpty()) {
+                val task = tasks[0]
+                task.setExcludeFromRecents(hide)
+            }
+        } catch (e: Exception) {
+            Logs.w("Failed to set excludeFromRecents: ${e.message}")
+        }
+    }
+
     fun refreshNavMenu(clashApi: Boolean) {
         if (::navigation.isInitialized) {
             navigation.menu.findItem(R.id.nav_traffic)?.isVisible = clashApi
-            navigation.menu.findItem(R.id.nav_tuiguang)?.isVisible = !isPlay
         }
     }
 
@@ -366,10 +392,6 @@ class MainActivity : ThemedActivity(),
             }
 
             R.id.nav_about -> displayFragment(AboutFragment())
-            R.id.nav_tuiguang -> {
-                launchCustomTab("https://neko-box.pages.dev/喵")
-                return false
-            }
 
             else -> return false
         }

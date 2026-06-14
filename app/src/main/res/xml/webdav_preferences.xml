@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditTextPreference
+        android:key="webdavServer"
+        android:title="@string/webdav_server"
+        android:singleLine="true"
+        android:summary="%s" />
+
+    <EditTextPreference
+        android:key="webdavUsername"
+        android:title="@string/webdav_username"
+        android:singleLine="true"
+        android:summary="%s" />
+
+    <EditTextPreference
+        android:key="webdavPassword"
+        android:title="@string/webdav_password"
+        android:singleLine="true"
+        app:dialogLayout="@layout/layout_password_dialog" />
+
+    <EditTextPreference
+        android:key="webdavPath"
+        android:title="@string/webdav_path"
+        android:singleLine="true"
+        android:defaultValue="NekoBox"
+        android:summary="%s" />
+
+    <Preference
+        android:key="webdavTest"
+        android:title="@string/webdav_test" />
+
+</PreferenceScreen>

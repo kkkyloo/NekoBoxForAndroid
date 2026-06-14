@@ -15,8 +15,13 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.ktx.*
+import io.nekohasekai.sagernet.utils.AppLocale
 import io.nekohasekai.sagernet.utils.Theme
 import moe.matsuri.nb4a.ui.*
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
+import java.io.File
 
 class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
@@ -61,6 +66,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             Theme.applyNightTheme()
             true
         }
+        val appLanguage = findPreference<SimpleMenuPreference>(Key.APP_LANGUAGE)!!
+        appLanguage.setOnPreferenceChangeListener { _, newValue ->
+            AppLocale.apply(newValue as String)
+            true
+        }
         val mixedPort = findPreference<EditTextPreference>(Key.MIXED_PORT)!!
         val enableLocalProxyInVpn = findPreference<SwitchPreference>(Key.ENABLE_LOCAL_PROXY_IN_VPN)!! 
         val mixedUsername = findPreference<EditTextPreference>(Key.MIXED_USERNAME)!!
@@ -68,11 +78,15 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val serviceMode = findPreference<Preference>(Key.SERVICE_MODE)!!
         val allowAccess = findPreference<Preference>(Key.ALLOW_ACCESS)!!
         val appendHttpProxy = findPreference<SwitchPreference>(Key.APPEND_HTTP_PROXY)!!
+<<<<<<< HEAD
         appendHttpProxy.isEnabled = DataStore.enableLocalProxyInVpn 
         enableLocalProxyInVpn.setOnPreferenceChangeListener { _, newValue ->
             appendHttpProxy.isEnabled = newValue as Boolean
             reloadListener.onPreferenceChange(enableLocalProxyInVpn, newValue)
         }
+=======
+        val strictRoute = findPreference<SwitchPreference>(Key.STRICT_ROUTE)!!
+>>>>>>> starifly/main
 
         val showDirectSpeed = findPreference<SwitchPreference>(Key.SHOW_DIRECT_SPEED)!!
         val ipv6Mode = findPreference<Preference>(Key.IPV6_MODE)!!
@@ -85,6 +99,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val directDns = findPreference<EditTextPreference>(Key.DIRECT_DNS)!!
         val enableDnsRouting = findPreference<SwitchPreference>(Key.ENABLE_DNS_ROUTING)!!
         val enableFakeDns = findPreference<SwitchPreference>(Key.ENABLE_FAKEDNS)!!
+
+        val enableTLSFragment = findPreference<SwitchPreference>(Key.ENABLE_TLS_FRAGMENT)!!
 
         val logLevel = findPreference<LongClickListPreference>(Key.LOG_LEVEL)!!
         val mtu = findPreference<MTUPreference>(Key.MTU)!!
@@ -149,6 +165,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val tunImplementation = findPreference<SimpleMenuPreference>(Key.TUN_IMPLEMENTATION)!!
         val resolveDestination = findPreference<SwitchPreference>(Key.RESOLVE_DESTINATION)!!
         val acquireWakeLock = findPreference<SwitchPreference>(Key.ACQUIRE_WAKE_LOCK)!!
+        val hideFromRecentApps = findPreference<SwitchPreference>(Key.HIDE_FROM_RECENT_APPS)!!
         val enableClashAPI = findPreference<SwitchPreference>(Key.ENABLE_CLASH_API)!!
         enableClashAPI.setOnPreferenceChangeListener { _, newValue ->
             (activity as MainActivity?)?.refreshNavMenu(newValue as Boolean)
@@ -156,16 +173,45 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             true
         }
 
+        val rulesProvider = findPreference<SimpleMenuPreference>(Key.RULES_PROVIDER)!!
+        val rulesGeositeUrl = findPreference<EditTextPreference>(Key.RULES_GEOSITE_URL)!!
+        val rulesGeoipUrl = findPreference<EditTextPreference>(Key.RULES_GEOIP_URL)!!
+        rulesGeositeUrl.isVisible = DataStore.rulesProvider == 4
+        rulesGeoipUrl.isVisible = DataStore.rulesProvider == 4
+        rulesProvider.setOnPreferenceChangeListener { _, newValue ->
+            val provider = (newValue as String).toInt()
+            rulesGeositeUrl.isVisible = provider == 4
+            rulesGeoipUrl.isVisible = provider == 4
+            true
+        }
+
         mixedPort.onPreferenceChangeListener = reloadListener
-        enableLocalProxyInVpn.onPreferenceChangeListener = reloadListener
-        mixedUsername.onPreferenceChangeListener = reloadListener
-        mixedPassword.onPreferenceChangeListener = reloadListener
-        appendHttpProxy.onPreferenceChangeListener = reloadListener
+        appendHttpProxy.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue as Boolean) {
+                MaterialAlertDialogBuilder(requireContext()).apply {
+                    setTitle(R.string.append_http_proxy_security_title)
+                    setMessage(R.string.append_http_proxy_security_message)
+                    setNegativeButton(android.R.string.cancel, null)
+                    setPositiveButton(R.string.enable_anyway) { _, _ ->
+                        appendHttpProxy.isChecked = true
+                        needReload()
+                    }
+                }.show()
+                false
+            } else {
+                needReload()
+                true
+            }
+        }
+        strictRoute.onPreferenceChangeListener = reloadListener
         showDirectSpeed.onPreferenceChangeListener = reloadListener
         trafficSniffing.onPreferenceChangeListener = reloadListener
         bypassLan.onPreferenceChangeListener = reloadListener
         bypassLanInCore.onPreferenceChangeListener = reloadListener
         mtu.onPreferenceChangeListener = reloadListener
+
+        val concurrentDial = findPreference<SwitchPreference>(Key.CONCURRENT_DIAL)!!
+        concurrentDial.onPreferenceChangeListener = reloadListener
 
         enableFakeDns.onPreferenceChangeListener = reloadListener
         remoteDns.onPreferenceChangeListener = reloadListener
@@ -272,6 +318,42 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         vpnWatchdogInterval?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
         vpnWatchdogInterval?.onPreferenceChangeListener = reloadListener
         // ────────────────────────────────────────────────────────────
+        hideFromRecentApps.setOnPreferenceChangeListener { _, newValue ->
+            (activity as? MainActivity)?.applyHideFromRecentApps(newValue as Boolean)
+            // needReload()
+            true
+        }
+
+        enableTLSFragment.onPreferenceChangeListener = reloadListener
+
+        // 恢复默认设置功能
+        val resetSettings = findPreference<Preference>("resetSettings")!!
+        resetSettings.setOnPreferenceClickListener {
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setTitle(R.string.confirm)
+                setMessage(R.string.reset_settings_message)
+                setNegativeButton(R.string.no, null)
+                setPositiveButton(R.string.yes) { _, _ ->
+                    DataStore.configurationStore.reset()
+                    triggerFullRestart(requireContext())
+                }
+            }.show()
+            true
+        }
+
+        // 清理缓存功能
+        val clearCache = findPreference<Preference>(Key.CLEAR_CACHE)!!
+        clearCache.setOnPreferenceClickListener {
+            MaterialAlertDialogBuilder(requireContext()).apply {
+                setTitle(R.string.clear_cache)
+                setMessage(R.string.clear_cache_confirm)
+                setPositiveButton(android.R.string.ok) { _, _ ->
+                    clearAppCache()
+                }
+                setNegativeButton(android.R.string.cancel, null)
+            }.show()
+            true
+        }
     }
 
     override fun onResume() {
@@ -285,4 +367,57 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
     }
 
+    private fun clearAppCache() {
+        try {
+            val cacheDir = SagerNet.application.cacheDir
+            clearDirFiles(cacheDir, skipFiles = setOf("neko.log"))
+            
+            val parentDir = cacheDir.parentFile
+            val relativeCache = File(parentDir, "cache")
+            if (relativeCache.exists() && relativeCache.isDirectory) {
+                clearDirFiles(relativeCache)
+            }
+            
+            Toast.makeText(requireContext(), R.string.clear_cache_success, Toast.LENGTH_SHORT).show()
+            
+            Handler(Looper.getMainLooper()).postDelayed({
+                needReload()
+            }, 500)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), getString(R.string.clear_cache_failed, e.message), Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+    
+    private fun clearDirFiles(dir: File, skipFiles: Set<String> = emptySet()): Boolean {
+        if (dir.isDirectory) {
+            val children = dir.list() ?: return true
+            
+            for (child in children) {
+                val childFile = File(dir, child)
+                
+                if (child == "neko.log") {
+                    try {
+                        childFile.writeText("")
+                        continue
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                
+                if (child in skipFiles) {
+                    continue
+                }
+                
+                if (childFile.isDirectory) {
+                    clearDirFiles(childFile, skipFiles)
+                } else {
+                    childFile.delete()
+                }
+            }
+            
+            return true
+        }
+        return false
+    }
 }

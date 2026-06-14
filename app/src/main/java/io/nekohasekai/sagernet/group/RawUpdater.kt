@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.group
 
 import android.annotation.SuppressLint
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.SubscriptionFilterMode
 import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.http.HttpBean
@@ -9,6 +10,9 @@ import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.fmt.hysteria.parseHysteria1Json
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.parseShadowsocks
+import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
+import io.nekohasekai.sagernet.fmt.shadowsocksr.parseShadowsocksR
+import io.nekohasekai.sagernet.fmt.snell.parseClashSnell
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan_go.parseTrojanGo
@@ -57,6 +61,11 @@ object RawUpdater : GroupUpdater() {
         } else {
 
             val response = Libcore.newHttpClient().apply {
+                trySocks5(
+                    DataStore.mixedPort,
+                    DataStore.mixedInboundUser,
+                    DataStore.mixedInboundPass
+                )
                 tryH3Direct()
                 when (DataStore.appTLSVersion) {
                     "1.3" -> restrictedTLS()
@@ -102,6 +111,18 @@ object RawUpdater : GroupUpdater() {
         proxies = proxiesMap.values.toList()
 
         if (subscription.forceResolve) forceResolve(proxies, proxyGroup.id)
+
+        val filterMode = subscription.filterMode ?: SubscriptionFilterMode.DISABLED
+        val filterRegex = subscription.filterRegex ?: ""
+        if (filterMode != SubscriptionFilterMode.DISABLED && filterRegex.isNotBlank()) {
+            val regex = filterRegex.toRegex()
+            proxies = when (filterMode) {
+                SubscriptionFilterMode.INCLUDE -> proxies.filter { regex.containsMatchIn(it.displayName()) }
+                SubscriptionFilterMode.EXCLUDE -> proxies.filterNot { regex.containsMatchIn(it.displayName()) }
+                else -> proxies
+            }
+            Logs.d("After filter (mode=$filterMode): ${proxies.size}")
+        }
 
         val exists = SagerDatabase.proxyDao.getByGroup(proxyGroup.id)
         val duplicate = ArrayList<String>()
@@ -303,6 +324,25 @@ object RawUpdater : GroupUpdater() {
                             })
                         }
 
+                        "ssr" -> {
+                            proxies.add(ShadowsocksRBean().apply {
+                                for (opt in proxy) {
+                                    if (opt.value == null) continue
+                                    when (opt.key) {
+                                        "name" -> name = opt.value.toString()
+                                        "server" -> serverAddress = opt.value as String
+                                        "port" -> serverPort = opt.value.toString().toInt()
+                                        "cipher" -> method = clashCipher(opt.value as String)
+                                        "password" -> password = opt.value.toString()
+                                        "obfs" -> obfs = opt.value as String
+                                        "protocol" -> protocol = opt.value as String
+                                        "obfs-param" -> obfsParam = opt.value.toString()
+                                        "protocol-param" -> protocolParam = opt.value.toString()
+                                    }
+                                }
+                            })
+                        }
+
                         "vmess", "vless", "trojan" -> {
                             val bean = when (proxy["type"] as String) {
                                 "vmess" -> VMessBean()
@@ -342,6 +382,10 @@ object RawUpdater : GroupUpdater() {
                                                 bean.encryption = "xtls-rprx-vision"
                                             }
                                         }
+                                    }
+
+                                    "encryption" -> if (bean is VMessBean && bean.isVLESS) {
+                                        bean.vlessEncryption = opt.value?.toString() ?: ""
                                     }
 
                                     "packet-encoding" -> if (bean is VMessBean) {
@@ -386,6 +430,7 @@ object RawUpdater : GroupUpdater() {
                                         when (opt.value) {
                                             "h2", "http" -> bean.type = "http"
                                             "ws", "grpc" -> bean.type = opt.value as String
+                                            "xhttp" -> if (bean.isVLESS) bean.type = "xhttp"
                                         }
                                     }
 
@@ -462,6 +507,104 @@ object RawUpdater : GroupUpdater() {
                                         }
                                     }
 
+                                    "xhttp-opts" -> if (bean.isVLESS && bean.type == "xhttp") {
+                                        (opt.value as? Map<String, Any?>)?.also { xhttpOpts ->
+                                            xhttpOpts["host"]?.toString()?.let {
+                                                bean.host = it
+                                            }
+                                            xhttpOpts["path"]?.toString()?.let {
+                                                bean.path = it
+                                            }
+                                            xhttpOpts["mode"]?.toString()?.let {
+                                                bean.xhttpMode = when (it) {
+                                                    "auto", "packet-up", "stream-up", "stream-one" -> it
+                                                    "" -> "auto"
+                                                    else -> bean.xhttpMode
+                                                }
+                                            }
+
+                                            val extra = JSONObject()
+                                            xhttpOpts["no-grpc-header"]?.let {
+                                                extra.put("no_grpc_header", it)
+                                            }
+                                            xhttpOpts["x-padding-bytes"]?.toString()?.let {
+                                                extra.put("x_padding_bytes", it)
+                                            }
+                                            xhttpOpts["sc-max-each-post-bytes"]?.toString()?.let {
+                                                extra.put("sc_max_each_post_bytes", it)
+                                            }
+                                            xhttpOpts["sc-min-posts-interval-ms"]?.toString()?.let {
+                                                extra.put("sc_min_posts_interval_ms", it)
+                                            }
+                                            xhttpOpts["x-padding-obfs-mode"]?.let {
+                                                extra.put("x_padding_obfs_mode", it)
+                                            }
+                                            xhttpOpts["x-padding-key"]?.toString()?.let {
+                                                extra.put("x_padding_key", it)
+                                            }
+                                            xhttpOpts["x-padding-header"]?.toString()?.let {
+                                                extra.put("x_padding_header", it)
+                                            }
+                                            xhttpOpts["x-padding-placement"]?.toString()?.let {
+                                                extra.put("x_padding_placement", it)
+                                            }
+                                            xhttpOpts["x-padding-method"]?.toString()?.let {
+                                                extra.put("x_padding_method", it)
+                                            }
+                                            xhttpOpts["uplink-http-method"]?.toString()?.let {
+                                                extra.put("uplink_http_method", it)
+                                            }
+                                            xhttpOpts["session-placement"]?.toString()?.let {
+                                                extra.put("session_placement", it)
+                                            }
+                                            xhttpOpts["session-key"]?.toString()?.let {
+                                                extra.put("session_key", it)
+                                            }
+                                            xhttpOpts["seq-placement"]?.toString()?.let {
+                                                extra.put("seq_placement", it)
+                                            }
+                                            xhttpOpts["seq-key"]?.toString()?.let {
+                                                extra.put("seq_key", it)
+                                            }
+                                            xhttpOpts["uplink-data-placement"]?.toString()?.let {
+                                                extra.put("uplink_data_placement", it)
+                                            }
+                                            xhttpOpts["uplink-data-key"]?.toString()?.let {
+                                                extra.put("uplink_data_key", it)
+                                            }
+                                            xhttpOpts["uplink-chunk-size"]?.toString()?.let {
+                                                extra.put("uplink_chunk_size", it)
+                                            }
+                                            (xhttpOpts["reuse-settings"] as? Map<*, *>)?.let { reuseSettings ->
+                                                val xmux = JSONObject()
+                                                reuseSettings["max-connections"]?.toString()?.let {
+                                                    xmux.put("max_connections", it)
+                                                }
+                                                reuseSettings["max-concurrency"]?.toString()?.let {
+                                                    xmux.put("max_concurrency", it)
+                                                }
+                                                reuseSettings["c-max-reuse-times"]?.toString()?.let {
+                                                    xmux.put("c_max_reuse_times", it)
+                                                }
+                                                reuseSettings["h-max-request-times"]?.toString()?.let {
+                                                    xmux.put("h_max_request_times", it)
+                                                }
+                                                reuseSettings["h-max-reusable-secs"]?.toString()?.let {
+                                                    xmux.put("h_max_reusable_secs", it)
+                                                }
+                                                reuseSettings["h-keep-alive-period"]?.toString()?.let {
+                                                    xmux.put("h_keep_alive_period", it)
+                                                }
+                                                if (xmux.length() > 0) {
+                                                    extra.put("xmux", xmux)
+                                                }
+                                            }
+                                            if (extra.length() > 0) {
+                                                bean.xhttpExtra = extra.toString(2)
+                                            }
+                                        }
+                                    }
+
                                     "smux" -> (opt.value as? Map<String, Any?>)?.also {
                                         for (smuxOpt in it) {
                                             when (smuxOpt.key) {
@@ -482,6 +625,9 @@ object RawUpdater : GroupUpdater() {
                                             when (echOpt.key) {
                                                 "enable" -> bean.enableECH =
                                                     echOpt.value.toString() == "true"
+
+                                                "config" -> bean.echConfig =
+                                                    echOpt.value?.toString()
                                             }
                                         }
                                     }
@@ -509,6 +655,67 @@ object RawUpdater : GroupUpdater() {
                                     "alpn" -> {
                                         val alpn = (opt.value as? (List<String>))
                                         bean.alpn = alpn?.joinToString("\n")
+                                    }
+                                    "reality-pub-key", "public-key" -> bean.realityPubKey =
+                                        opt.value.toString()
+                                    "reality-short-id", "short-id" -> bean.realityShortId =
+                                        opt.value.toString()
+                                }
+                            }
+                            proxies.add(bean)
+                        }
+
+                        "wireguard" -> {
+                            val peers = proxy["peers"] as? List<Map<String, Any?>>
+                            val configToUse = peers?.firstOrNull() ?: proxy
+
+                            val bean = WireGuardBean().apply {
+                                name = proxy["name"].toString()
+
+                                for ((key, value) in configToUse) {
+                                    when (key.replace("_", "-")) {
+                                        "server" -> serverAddress = value.toString()
+                                        "port" -> serverPort = value.toString().toIntOrNull() ?: 0
+                                        "mtu" -> mtu = value.toString().toIntOrNull() ?: 0
+                                        "ip" -> {
+                                            val ipValue = value.toString()
+                                            localAddress = if (!ipValue.contains("/")) {
+                                                "$ipValue/32"
+                                            } else {
+                                                ipValue
+                                            }
+                                        }
+                                        "ipv6" -> {
+                                            val ipv6Value = value.toString()
+                                            val processedIPv6Value = if (!ipv6Value.contains("/")) {
+                                                "$ipv6Value/128"
+                                            } else {
+                                                ipv6Value
+                                            }
+                                            if (localAddress.isNullOrEmpty()) {
+                                                localAddress = processedIPv6Value
+                                            } else {
+                                                localAddress += "\n$processedIPv6Value"
+                                            }
+                                        }
+                                        "private-key" -> privateKey = value.toString()
+                                        "public-key" -> peerPublicKey = value.toString()
+                                        "pre-shared-key", "preshared-key" -> peerPreSharedKey = value.toString()
+                                        "reserved" -> {
+                                            val reservedValue = value
+                                            when (reservedValue) {
+                                                is List<*> -> {
+                                                    if (reservedValue.size == 1) {
+                                                        reserved = reservedValue[0].toString().replace("[\\[\\] ]".toRegex(), "")
+                                                    } else {
+                                                        reserved = reservedValue.joinToString("\n") { it.toString() }
+                                                    }
+                                                }
+                                                else -> {
+                                                    reserved = reservedValue.toString().replace("[\\[\\] ]".toRegex(), "")
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -653,6 +860,11 @@ object RawUpdater : GroupUpdater() {
                             }
                             proxies.add(bean)
                         }
+
+                        "snell" -> {
+                            val bean = parseClashSnell(proxy)
+                            proxies.add(bean)
+                        }
                     }
                 }
 
@@ -754,6 +966,10 @@ object RawUpdater : GroupUpdater() {
             when {
                 json.has("server") && (json.has("up") || json.has("up_mbps")) -> {
                     return listOf(json.parseHysteria1Json())
+                }
+
+                json.has("method") && json.has("obfs") && json.has("protocol") -> {
+                    return listOf(json.parseShadowsocksR())
                 }
 
                 json.has("method") -> {

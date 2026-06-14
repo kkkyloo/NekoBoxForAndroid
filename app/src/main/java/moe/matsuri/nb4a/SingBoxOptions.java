@@ -882,6 +882,13 @@ public class SingBoxOptions {
 
     }
 
+    public static class Fragment extends SingBoxOption {
+
+        public String length;
+
+        public String interval;
+    }
+
     public static class DialerOptions extends SingBoxOption {
 
         public String detour;
@@ -935,6 +942,18 @@ public class SingBoxOptions {
         public Integer max_streams;
 
         public Boolean padding;
+
+        public BrutalOptions brutal;
+
+    }
+
+    public static class BrutalOptions extends SingBoxOption {
+
+        public Boolean enabled;
+
+        public Integer up_mbps;
+
+        public Integer down_mbps;
 
     }
 
@@ -1063,6 +1082,8 @@ public class SingBoxOptions {
 
         public Integer default_mark;
 
+        public Boolean concurrent_dial;
+
     }
 
 
@@ -1087,6 +1108,8 @@ public class SingBoxOptions {
         public String path;
 
         public String url;
+
+	public String update_interval;
 
     }
 
@@ -4232,6 +4255,8 @@ public class SingBoxOptions {
 
         public String flow;
 
+        public String encryption;
+
         public String network;
 
         public OutboundTLSOptions tls;
@@ -4298,6 +4323,56 @@ public class SingBoxOptions {
         public Long heartbeat;
 
         public String network;
+
+        public OutboundTLSOptions tls;
+
+    }
+
+    public static class Outbound_JuicityOptions extends Outbound {
+
+        // Generate note: nested type DialerOptions
+        public String detour;
+
+        public String bind_interface;
+
+        public String inet4_bind_address;
+
+        public String inet6_bind_address;
+
+        public String protect_path;
+
+        public Integer routing_mark;
+
+        public Boolean reuse_addr;
+
+        public Long connect_timeout;
+
+        public Boolean tcp_fast_open;
+
+        public Boolean tcp_multi_path;
+
+        public Boolean udp_fragment;
+
+        public String domain_strategy;
+
+        public Long fallback_delay;
+
+        // End of public DialerOptions ;
+
+        // Generate note: nested type ServerOptions
+        public String server;
+
+        public Integer server_port;
+
+        // End of public ServerOptions ;
+
+        public String uuid;
+
+        public String password;
+
+        public String network;
+
+        public String pin_cert_sha256;
 
         public OutboundTLSOptions tls;
 
@@ -4588,6 +4663,62 @@ public class SingBoxOptions {
 
     }
 
+    public static class V2RayTransportOptions_XHTTPOptions extends V2RayTransportOptions {
+
+        public String mode;
+
+        public String host;
+
+        public String path;
+
+        // Advanced field from extra config
+        public com.google.gson.JsonElement download;
+        public com.google.gson.JsonElement xmux;
+        public Map<String, String> headers;
+        public com.google.gson.JsonElement x_padding_bytes;
+        public com.google.gson.JsonElement no_grpc_header;
+        public com.google.gson.JsonElement sc_max_each_post_bytes;
+        public com.google.gson.JsonElement sc_min_posts_interval_ms;
+        public com.google.gson.JsonElement x_padding_obfs_mode;
+        public com.google.gson.JsonElement x_padding_key;
+        public com.google.gson.JsonElement x_padding_header;
+        public com.google.gson.JsonElement x_padding_placement;
+        public com.google.gson.JsonElement x_padding_method;
+        public com.google.gson.JsonElement uplink_http_method;
+        public com.google.gson.JsonElement session_placement;
+        public com.google.gson.JsonElement session_key;
+        public com.google.gson.JsonElement seq_placement;
+        public com.google.gson.JsonElement seq_key;
+        public com.google.gson.JsonElement uplink_data_placement;
+        public com.google.gson.JsonElement uplink_data_key;
+        public com.google.gson.JsonElement uplink_chunk_size;
+
+    }
+
+    public static class V2RayTransportOptions_KCPOptions extends V2RayTransportOptions {
+
+        public Integer mtu;
+
+        public Integer tti;
+
+        public Integer uplink_capacity;
+
+        public Integer downlink_capacity;
+
+        public Boolean congestion;
+
+        public Integer read_buffer_size;
+
+        public Integer write_buffer_size;
+
+        public Integer cwnd_multiplier;
+
+        public String header_type;
+
+        public String seed;
+
+    }
+
     // sing-box Options 生成器已经坏了，以下是从 husi 抄的
 
     public static class Outbound_AnyTLSOptions extends Outbound {
@@ -4638,6 +4769,61 @@ public class SingBoxOptions {
         public String idle_session_check_interval;
 
         public String idle_session_timeout;
+
+    }
+
+    public static class Outbound_SnellOptions extends Outbound {
+
+        // Generate note: nested type DialerOptions
+        public String detour;
+
+        public String bind_interface;
+
+        public String inet4_bind_address;
+
+        public String inet6_bind_address;
+
+        public String protect_path;
+
+        public Integer routing_mark;
+
+        public Boolean reuse_addr;
+
+        public String connect_timeout;
+
+        public Boolean tcp_fast_open;
+
+        public Boolean tcp_multi_path;
+
+        public Boolean udp_fragment;
+
+        public String domain_strategy;
+
+        public String network_strategy;
+
+        public List<String> network_type;
+
+        public List<String> fallback_network_type;
+
+        public String fallback_delay;
+
+        // Generate note: nested type ServerOptions
+        public String server;
+
+        public Integer server_port;
+
+        // Snell specific options
+        public String psk;
+
+        public Integer version;
+
+        public String network;
+
+        public String obfs_mode;
+
+        public String obfs_host;
+
+        public Boolean reuse;
 
     }
 
