@@ -505,7 +505,7 @@
     <string name="layout_single_column">Один столбец</string>
     <string name="layout_double_column">Два столбца</string>
     <string name="sort_and_layout">Сортировка и макет</string>
-    <string name="require_http">Включить входящий HTTP</string>
+
     <string name="show_stop">Показывать кнопку остановки</string>
     <string name="show_stop_sum">Если вы не хотите использовать быструю плитку как переключатель</string>
     <string name="connection_test_fail">Интернет недоступен</string>

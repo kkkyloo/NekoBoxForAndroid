@@ -78,15 +78,12 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val serviceMode = findPreference<Preference>(Key.SERVICE_MODE)!!
         val allowAccess = findPreference<Preference>(Key.ALLOW_ACCESS)!!
         val appendHttpProxy = findPreference<SwitchPreference>(Key.APPEND_HTTP_PROXY)!!
-<<<<<<< HEAD
+        val strictRoute = findPreference<SwitchPreference>(Key.STRICT_ROUTE)!!
         appendHttpProxy.isEnabled = DataStore.enableLocalProxyInVpn 
         enableLocalProxyInVpn.setOnPreferenceChangeListener { _, newValue ->
             appendHttpProxy.isEnabled = newValue as Boolean
             reloadListener.onPreferenceChange(enableLocalProxyInVpn, newValue)
         }
-=======
-        val strictRoute = findPreference<SwitchPreference>(Key.STRICT_ROUTE)!!
->>>>>>> starifly/main
 
         val showDirectSpeed = findPreference<SwitchPreference>(Key.SHOW_DIRECT_SPEED)!!
         val ipv6Mode = findPreference<Preference>(Key.IPV6_MODE)!!
@@ -186,6 +183,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         mixedPort.onPreferenceChangeListener = reloadListener
+        enableLocalProxyInVpn.onPreferenceChangeListener = reloadListener
+        mixedUsername.onPreferenceChangeListener = reloadListener
+        mixedPassword.onPreferenceChangeListener = reloadListener
         appendHttpProxy.setOnPreferenceChangeListener { _, newValue ->
             if (newValue as Boolean) {
                 MaterialAlertDialogBuilder(requireContext()).apply {
@@ -220,37 +220,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         ipv6Mode.onPreferenceChangeListener = reloadListener
         allowAccess.onPreferenceChangeListener = reloadListener
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
