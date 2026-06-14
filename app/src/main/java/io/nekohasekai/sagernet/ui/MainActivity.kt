@@ -235,20 +235,12 @@ class MainActivity : ThemedActivity(),
         group.name = group.name.takeIf { !it.isNullOrBlank() }
             ?: ("Subscription #" + System.currentTimeMillis())
 
+        // Import directly without a confirmation dialog popping up over the UI.
+        finishImportSubscription(group)
+
         onMainDispatcher {
-
             displayFragmentWithId(R.id.nav_group)
-
-            MaterialAlertDialogBuilder(this@MainActivity).setTitle(R.string.subscription_import)
-                .setMessage(getString(R.string.subscription_import_message, name))
-                .setPositiveButton(R.string.yes) { _, _ ->
-                    runOnDefaultDispatcher {
-                        finishImportSubscription(group)
-                    }
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
-
+            snackbar(getString(R.string.subscription_import_message, name)).show()
         }
 
     }
@@ -268,17 +260,8 @@ class MainActivity : ThemedActivity(),
             return
         }
 
-        onMainDispatcher {
-            MaterialAlertDialogBuilder(this@MainActivity).setTitle(R.string.profile_import)
-                .setMessage(getString(R.string.profile_import_message, profile.displayName()))
-                .setPositiveButton(R.string.yes) { _, _ ->
-                    runOnDefaultDispatcher {
-                        finishImportProfile(profile)
-                    }
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
-        }
+        // Import directly without a confirmation dialog popping up over the UI.
+        finishImportProfile(profile)
 
     }
 
