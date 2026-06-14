@@ -40,7 +40,7 @@ import kotlinx.coroutines.sync.withLock
 class ServiceNotification(
        private val service: BaseService.Interface, title: String,
        channel: String, visible: Boolean = false,
-   ) {
+   ) : BroadcastReceiver() {
     companion object {
         const val notificationId = 1
         val flags =
@@ -145,11 +145,11 @@ class ServiceNotification(
         }
     }
 
-  //  override fun onReceive(context: Context, intent: Intent) {
-  //      if (service.data.state == BaseService.State.Connected) {
- //           listenPostSpeed = intent.action == Intent.ACTION_SCREEN_ON
-  //      }
- //   }
+    override fun onReceive(context: Context, intent: Intent) {
+        if (service.data.state == BaseService.State.Connected) {
+            listenPostSpeed = intent.action == Intent.ACTION_SCREEN_ON
+        }
+    }
 
 
     private suspend fun show() =
