@@ -3,8 +3,8 @@ on:
   push:
     tags-ignore:
       - 'v*'
-    branches:
-      - '*'
+    branches-ignore:
+      - main
   pull_request:
 jobs:
   libcore:
