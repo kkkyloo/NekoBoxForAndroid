@@ -321,7 +321,6 @@ class BaseService {
             if (profile == null && DataStore.globalAutoUrl) {
                 profile = io.nekohasekai.sagernet.database.ProxyEntity(type = io.nekohasekai.sagernet.database.ProxyEntity.TYPE_CONFIG).apply {
                     id = -999L
-                    userRemarks = "🌐 Умный авто-выбор"
                     configBean = moe.matsuri.nb4a.proxy.config.ConfigBean().apply {
                         name = "🌐 Умный авто-выбор"
                     }
