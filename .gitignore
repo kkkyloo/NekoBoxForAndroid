@@ -18,3 +18,13 @@ jniLibs/
 
 # submodules
 /external
+
+# local debug subscription dumps (contain real secrets — never commit)
+/clash.txt
+/clash_real.txt
+/log.txt
+/sing.txt
+/sing_real.txt
+/v2b64_real.txt
+/xray.txt
+/*_real.txt
