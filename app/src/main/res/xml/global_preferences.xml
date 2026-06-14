@@ -70,12 +70,11 @@
             app:key="autoUrlCountryFilterMode"
             app:title="Режим фильтрации стран"
             app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:defaultValue=""
-            app:icon="@drawable/ic_baseline_edit_24"
+        <Preference
+            app:icon="@drawable/baseline_public_24"
             app:key="autoUrlCountryFilter"
-            app:title="Коды стран (через запятую)"
-            app:summary="Например: RU, UA, BY" />
+            app:title="Страны"
+            app:summary="Нажмите, чтобы выбрать страны" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:defaultValue="0"
             app:entries="@array/filter_mode_entries"
@@ -84,12 +83,11 @@
             app:key="autoUrlGroupFilterMode"
             app:title="Режим фильтрации подписок"
             app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:defaultValue=""
-            app:icon="@drawable/ic_baseline_edit_24"
+        <Preference
+            app:icon="@drawable/baseline_apps_24"
             app:key="autoUrlGroupFilter"
-            app:title="ID подписок (через запятую)"
-            app:summary="Оставьте пустым для тестирования всех" />
+            app:title="Подписки"
+            app:summary="Нажмите, чтобы выбрать подписки" />
         <EditTextPreference
             app:defaultValue="3000"
             app:icon="@drawable/ic_baseline_shutter_speed_24"

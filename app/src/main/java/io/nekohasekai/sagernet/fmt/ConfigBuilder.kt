@@ -29,6 +29,7 @@ import io.nekohasekai.sagernet.fmt.snell.SnellBean
 import io.nekohasekai.sagernet.fmt.snell.buildSingBoxOutboundSnellBean
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.fmt.wireguard.buildSingBoxOutboundWireguardBean
+import io.nekohasekai.sagernet.ktx.CountryUtil
 import io.nekohasekai.sagernet.ktx.isIpAddress
 import io.nekohasekai.sagernet.ktx.mkPort
 import io.nekohasekai.sagernet.utils.PackageCache
@@ -569,12 +570,14 @@ fun buildConfig(
 
             val countryFilterStr = DataStore.autoUrlCountryFilter
             if (countryFilterStr.isNotBlank()) {
-                val filters = countryFilterStr.split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }
-                if (filters.isNotEmpty()) {
+                val codes = countryFilterStr.split(",").map { it.trim().uppercase() }.filter { it.isNotEmpty() }
+                if (codes.isNotEmpty()) {
                     val mode = DataStore.autoUrlCountryFilterMode.toIntOrNull() ?: 0
                     list = list.filter { proxy ->
-                        val name = proxy.displayName().lowercase()
-                        val matches = filters.any { filter -> name.contains(filter) }
+                        val code = CountryUtil.codeOf(proxy.displayName())
+                        // include: keep only matching codes; exclude: drop matching codes
+                        // (servers with unknown country are kept in exclude mode, dropped in include).
+                        val matches = code != null && codes.contains(code)
                         if (mode == 1) matches else !matches
                     }
                 }

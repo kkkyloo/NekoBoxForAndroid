@@ -100,7 +100,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var globalAutoUrl by configurationStore.boolean(Key.GLOBAL_AUTO_URL) { false }
     var autoUrlTestUrl by configurationStore.string(Key.AUTO_URL_TEST_URL) { "https://cp.cloudflare.com/generate_204" }
     var autoUrlCountryFilterMode by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER_MODE) { "0" } // 0 = exclude, 1 = include
-    var autoUrlCountryFilter by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER) { "🇷🇺,россия,russia" }
+    // ISO 3166-1 alpha-2 codes, comma-separated. Default excludes RU from Auto-URL.
+    var autoUrlCountryFilter by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER) { "RU" }
     var autoUrlGroupFilterMode by configurationStore.string(Key.AUTO_URL_GROUP_FILTER_MODE) { "0" } // 0 = exclude, 1 = include
     var autoUrlGroupFilter by configurationStore.string(Key.AUTO_URL_GROUP_FILTER) { "" }
     var autoUrlTolerance by configurationStore.int(Key.AUTO_URL_TOLERANCE) { 50 }
@@ -218,7 +219,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var appendHttpProxy by configurationStore.boolean(Key.APPEND_HTTP_PROXY)
     var strictRoute by configurationStore.boolean(Key.STRICT_ROUTE) { true }
     var connectionTestURL by configurationStore.string(Key.CONNECTION_TEST_URL) { CONNECTION_TEST_URL }
-    var connectionTestConcurrent by configurationStore.int("connectionTestConcurrent") { 5 }
+    var connectionTestConcurrent by configurationStore.int("connectionTestConcurrent") { 10 }
     var connectionTestTimeout by configurationStore.int(Key.CONNECTION_TEST_TIMEOUT) { 3000 }
     var alwaysShowAddress by configurationStore.boolean(Key.ALWAYS_SHOW_ADDRESS)
 

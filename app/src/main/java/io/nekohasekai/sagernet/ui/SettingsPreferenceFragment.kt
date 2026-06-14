@@ -350,6 +350,111 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
         findPreference<EditTextPreference>(Key.AUTO_URL_TOLERANCE)
             ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+
+        // Auto-URL country / subscription pickers (checkbox dialogs instead of raw text).
+        findPreference<Preference>(Key.AUTO_URL_COUNTRY_FILTER)?.apply {
+            updateCountryFilterSummary(this)
+            setOnPreferenceClickListener { showCountryPicker(this); true }
+        }
+        findPreference<Preference>(Key.AUTO_URL_GROUP_FILTER)?.apply {
+            updateGroupFilterSummary(this)
+            setOnPreferenceClickListener { showGroupPicker(this); true }
+        }
+    }
+
+    private fun updateCountryFilterSummary(pref: Preference) {
+        val codes = DataStore.autoUrlCountryFilter.split(",")
+            .map { it.trim().uppercase() }.filter { it.isNotEmpty() }
+        pref.summary = if (codes.isEmpty()) "Все страны (фильтр выключен)"
+        else codes.joinToString(", ") { io.nekohasekai.sagernet.ktx.CountryUtil.displayOf(it) }
+    }
+
+    // Collect countries detected across all servers and let the user check which to filter.
+    private fun showCountryPicker(pref: Preference) {
+        runOnDefaultDispatcher {
+            val present = LinkedHashSet<String>()
+            try {
+                io.nekohasekai.sagernet.database.SagerDatabase.proxyDao.getAll().forEach { ent ->
+                    io.nekohasekai.sagernet.ktx.CountryUtil.codeOf(ent.displayName())?.let { present.add(it) }
+                }
+            } catch (_: Exception) {
+            }
+            // Always include already-selected codes even if no server currently matches.
+            val selectedNow = DataStore.autoUrlCountryFilter.split(",")
+                .map { it.trim().uppercase() }.filter { it.isNotEmpty() }.toMutableSet()
+            present.addAll(selectedNow)
+            val codes = present.toList()
+            onMainDispatcher {
+                if (codes.isEmpty()) {
+                    Toast.makeText(requireContext(), "Не найдено серверов с определимой страной", Toast.LENGTH_SHORT).show()
+                    return@onMainDispatcher
+                }
+                val labels = codes.map { io.nekohasekai.sagernet.ktx.CountryUtil.displayOf(it) }.toTypedArray()
+                val checked = BooleanArray(codes.size) { selectedNow.contains(codes[it]) }
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Страны")
+                    .setMultiChoiceItems(labels, checked) { _, which, isChecked -> checked[which] = isChecked }
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        DataStore.autoUrlCountryFilter = codes.filterIndexed { i, _ -> checked[i] }.joinToString(",")
+                        updateCountryFilterSummary(pref)
+                        needReload()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        }
+    }
+
+    private fun updateGroupFilterSummary(pref: Preference) {
+        val ids = DataStore.autoUrlGroupFilter.split(",")
+            .mapNotNull { it.trim().toLongOrNull() }
+        if (ids.isEmpty()) {
+            pref.summary = "Все подписки"
+            return
+        }
+        runOnDefaultDispatcher {
+            val names = try {
+                io.nekohasekai.sagernet.database.SagerDatabase.groupDao.allGroups()
+                    .filter { ids.contains(it.id) }.map { it.displayName() }
+            } catch (_: Exception) {
+                emptyList()
+            }
+            onMainDispatcher {
+                pref.summary = if (names.isEmpty()) "Выбрано подписок: ${ids.size}"
+                else names.joinToString(", ")
+            }
+        }
+    }
+
+    private fun showGroupPicker(pref: Preference) {
+        runOnDefaultDispatcher {
+            val groups = try {
+                io.nekohasekai.sagernet.database.SagerDatabase.groupDao.allGroups()
+            } catch (_: Exception) {
+                emptyList()
+            }
+            val selectedNow = DataStore.autoUrlGroupFilter.split(",")
+                .mapNotNull { it.trim().toLongOrNull() }.toSet()
+            onMainDispatcher {
+                if (groups.isEmpty()) {
+                    Toast.makeText(requireContext(), "Нет подписок", Toast.LENGTH_SHORT).show()
+                    return@onMainDispatcher
+                }
+                val labels = groups.map { it.displayName() }.toTypedArray()
+                val checked = BooleanArray(groups.size) { selectedNow.contains(groups[it].id) }
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Подписки")
+                    .setMultiChoiceItems(labels, checked) { _, which, isChecked -> checked[which] = isChecked }
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        DataStore.autoUrlGroupFilter = groups.filterIndexed { i, _ -> checked[i] }
+                            .joinToString(",") { it.id.toString() }
+                        updateGroupFilterSummary(pref)
+                        needReload()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        }
     }
 
     override fun onResume() {

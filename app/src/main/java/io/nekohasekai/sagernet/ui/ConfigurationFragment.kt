@@ -64,6 +64,7 @@ import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.toUniversalLink
 import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.group.RawUpdater
+import io.nekohasekai.sagernet.ktx.CountryUtil
 import io.nekohasekai.sagernet.ktx.FixedLinearLayoutManager
 import io.nekohasekai.sagernet.ktx.FixedGridLayoutManager
 import io.nekohasekai.sagernet.ktx.Logs
@@ -225,12 +226,13 @@ class ConfigurationFragment @JvmOverloads constructor(
                 var list = SagerDatabase.proxyDao.getAll().filter {
                     it.type != ProxyEntity.TYPE_NEKO && it.type != ProxyEntity.TYPE_CHAIN
                 }
-                val filters = DataStore.autoUrlCountryFilter.split(",")
-                    .map { it.trim().lowercase() }.filter { it.isNotEmpty() }
-                if (filters.isNotEmpty()) {
+                val codes = DataStore.autoUrlCountryFilter.split(",")
+                    .map { it.trim().uppercase() }.filter { it.isNotEmpty() }
+                if (codes.isNotEmpty()) {
                     val mode = DataStore.autoUrlCountryFilterMode.toIntOrNull() ?: 0
                     list = list.filter { p ->
-                        val matches = filters.any { p.displayName().lowercase().contains(it) }
+                        val code = CountryUtil.codeOf(p.displayName())
+                        val matches = code != null && codes.contains(code)
                         if (mode == 1) matches else !matches
                     }
                 }
@@ -1379,7 +1381,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                     val profiles =
                         ConcurrentLinkedQueue(SagerDatabase.proxyDao.getByGroup(proxyGroup.id))
                     val jobs = mutableListOf<Job>()
-                    repeat(DataStore.connectionTestConcurrent) {
+                    repeat(DataStore.connectionTestConcurrent.coerceAtLeast(1)) {
                         jobs.add(launch(Dispatchers.IO) {
                             val urlTest = UrlTest()
                             while (isActive) {
@@ -1404,6 +1406,14 @@ class ConfigurationFragment @JvmOverloads constructor(
                 Logs.w(e)
             } finally {
                 DataStore.runningTest = false
+            }
+            // Pings just changed in the DB; re-sort the list (no scroll, so the user's
+            // position is kept) and refresh the Auto-URL banner so its "current server · ms"
+            // stays live too — both were previously stale until a manual reload. We're on a
+            // background dispatcher here; reloadProfiles queries the DB and posts UI updates itself.
+            try {
+                adapter?.reloadProfiles(scroll = false)
+            } catch (_: Exception) {
             }
         }
 
@@ -1774,7 +1784,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                 reloadProfiles()
             }
 
-            fun reloadProfiles() {
+            fun reloadProfiles(scroll: Boolean = true) {
                 var newProfiles = SagerDatabase.proxyDao.getByGroup(proxyGroup.id)
                 when (proxyGroup.order) {
                     GroupOrder.BY_NAME -> {
@@ -1804,10 +1814,12 @@ class ConfigurationFragment @JvmOverloads constructor(
                     configurationIdList.addAll(newProfileIds)
                     notifyDataSetChanged()
 
-                    if (selectedProfileIndex != -1) {
-                        configurationListView.scrollTo(selectedProfileIndex, true)
-                    } else if (newProfiles.isNotEmpty()) {
-                        configurationListView.scrollTo(0, true)
+                    if (scroll) {
+                        if (selectedProfileIndex != -1) {
+                            configurationListView.scrollTo(selectedProfileIndex, true)
+                        } else if (newProfiles.isNotEmpty()) {
+                            configurationListView.scrollTo(0, true)
+                        }
                     }
 
                     (this@GroupFragment.parentFragment as? ConfigurationFragment)
