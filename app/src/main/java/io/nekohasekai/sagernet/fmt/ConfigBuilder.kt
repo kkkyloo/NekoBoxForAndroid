@@ -536,8 +536,24 @@ fun buildConfig(
 
         // build outbounds
         if (DataStore.globalAutoUrl && !forTest) {
-            var list = SagerDatabase.proxyDao.getAll().filter { it.type != ProxyEntity.TYPE_CONFIG && it.type != ProxyEntity.TYPE_NEKO && it.type != ProxyEntity.TYPE_CHAIN }
-            
+            var list = SagerDatabase.proxyDao.getAll().filter {
+                it.type != ProxyEntity.TYPE_NEKO && it.type != ProxyEntity.TYPE_CHAIN
+            }.filter { ent ->
+                // Custom configs (TYPE_CONFIG) include servers imported from a sing-box /
+                // xray subscription (one outbound per profile). Allow those single-outbound
+                // configs into the urltest pool, but skip full configs that bring their own
+                // inbounds/outbounds/route — they cannot be members of a urltest.
+                if (ent.type != ProxyEntity.TYPE_CONFIG) return@filter true
+                val cfg = (ent.requireBean() as? ConfigBean)?.config ?: return@filter false
+                try {
+                    val map = gson.fromJson(cfg, mutableMapOf<String, Any>().javaClass)
+                    map.containsKey("type") && !map.containsKey("inbounds") &&
+                        !map.containsKey("outbounds") && !map.containsKey("route")
+                } catch (e: Exception) {
+                    false
+                }
+            }
+
             val groupFilterStr = DataStore.autoUrlGroupFilter
             if (groupFilterStr.isNotBlank()) {
                 val groupIds = groupFilterStr.split(",").mapNotNull { it.trim().toLongOrNull() }
