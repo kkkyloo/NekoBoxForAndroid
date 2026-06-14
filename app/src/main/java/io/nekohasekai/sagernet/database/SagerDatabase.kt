@@ -109,7 +109,9 @@ abstract class SagerDatabase : RoomDatabase() {
         val instance by lazy {
             SagerNet.application.getDatabasePath(Key.DB_PROFILE).parentFile?.mkdirs()
             Room.databaseBuilder(SagerNet.application, SagerDatabase::class.java, Key.DB_PROFILE)
-                .addMigrations(MIGRATION_7_8)
+                // No manual 7->8 migration: old fork DBs stamped "v7" have a schema that
+                // doesn't match, causing crash-loops. Let Room recreate the DB destructively
+                // on upgrade (one-time wipe; user re-imports their subscription).
                 .setJournalMode(JournalMode.TRUNCATE)
                 .allowMainThreadQueries()
                 .enableMultiInstanceInvalidation()
