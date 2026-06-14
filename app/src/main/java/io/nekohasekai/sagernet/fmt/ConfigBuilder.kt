@@ -535,7 +535,20 @@ fun buildConfig(
         }
 
         // build outbounds
-        if (buildSelector) {
+        if (DataStore.globalAutoUrl && !forTest) {
+            val list = SagerDatabase.proxyDao.getAll().filter { it.type != ProxyEntity.TYPE_CONFIG && it.type != ProxyEntity.TYPE_NEKO && it.type != ProxyEntity.TYPE_CHAIN }
+            list.forEach {
+                tagMap[it.id] = buildChain(it.id, it)
+            }
+            outbounds.add(0, Outbound_URLTestOptions().apply {
+                type = "urltest"
+                tag = TAG_PROXY
+                outbounds = tagMap.values.toList()
+                url = "https://cp.cloudflare.com/generate_204"
+                interval = "3m"
+                tolerance = 50
+            })
+        } else if (buildSelector) {
             val list = group.id.let { SagerDatabase.proxyDao.getByGroup(it) }
             list.forEach {
                 tagMap[it.id] = buildChain(it.id, it)

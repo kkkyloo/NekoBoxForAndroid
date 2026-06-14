@@ -179,10 +179,10 @@ class BaseService {
             if (intent.action == Action.SERVICE) data.binder else null
 
         fun reload() {
-            if (DataStore.selectedProxy == 0L) {
+            if (DataStore.selectedProxy == 0L && !DataStore.globalAutoUrl) {
                 stopRunner(false, (this as Context).getString(R.string.profile_empty))
             }
-            if (canReloadSelector()) {
+            if (!DataStore.globalAutoUrl && canReloadSelector()) {
                 val ent = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
                 val tag = data.proxy!!.config.profileTagMap[ent?.id] ?: ""
                 if (tag.isNotBlank() && ent != null) {
@@ -203,7 +203,8 @@ class BaseService {
 
         fun canReloadSelector(): Boolean {
             if ((data.proxy?.config?.selectorGroupId ?: -1L) < 0) return false
-            val ent = SagerDatabase.proxyDao.getById(DataStore.selectedProxy) ?: return false
+            val ent = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
+            if (ent == null && !DataStore.globalAutoUrl) return false
             val tmpBox = ProxyInstance(ent)
             tmpBox.buildConfigTmp()
             if (tmpBox.lastSelectorGroupId == data.proxy?.lastSelectorGroupId) {
@@ -316,7 +317,13 @@ class BaseService {
 
             val data = data
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
-            val profile = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
+            var profile = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
+            if (profile == null && DataStore.globalAutoUrl) {
+                profile = io.nekohasekai.sagernet.database.ProxyEntity(type = io.nekohasekai.sagernet.database.ProxyEntity.TYPE_CONFIG).apply {
+                    id = -999L
+                    displayName = "🌐 Умный авто-выбор"
+                }
+            }
             this as Context
             if (profile == null) { // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
                 data.notification = createNotification("")

@@ -37,6 +37,7 @@ object Key {
     const val RESOLVE_DESTINATION = "resolveDestination"
 
     const val BYPASS_LAN = "bypassLan"
+    const val GLOBAL_AUTO_URL = "globalAutoUrl"
     const val BYPASS_LAN_IN_CORE = "bypassLanInCore"
     const val CONCURRENT_DIAL = "concurrentDial"
 

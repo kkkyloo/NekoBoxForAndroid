@@ -96,6 +96,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     }
 
     var showBottomBar by configurationStore.boolean(Key.SHOW_BOTTOM_BAR)
+    var globalAutoUrl by configurationStore.boolean(Key.GLOBAL_AUTO_URL) { false }
     var confirmProfileDelete by configurationStore.boolean(Key.CONFIRM_PROFILE_DELETE) { true }
     var groupLayoutMode by configurationStore.stringToInt(Key.GROUP_LAYOUT_MODE) { 0 }
 
