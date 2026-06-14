@@ -106,6 +106,7 @@ import io.nekohasekai.sagernet.widget.UndoSnackbarManager
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -145,6 +146,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     lateinit var tabLayout: TabLayout
     lateinit var groupPager: ViewPager2
     private var autoUrlSwitch: SwitchMaterial? = null
+    private var autoUrlBanner: MaterialCardView? = null
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
 
@@ -196,10 +198,25 @@ class ConfigurationFragment @JvmOverloads constructor(
         }
     }
 
+    private fun updateAutoUrlBannerStyle() {
+        val banner = autoUrlBanner ?: return
+        val density = banner.resources.displayMetrics.density
+        if (DataStore.globalAutoUrl) {
+            banner.strokeColor = com.google.android.material.color.MaterialColors.getColor(
+                banner, com.google.android.material.R.attr.colorPrimary, 0xFF3F51B5.toInt()
+            )
+            banner.strokeWidth = (density * 2).toInt()
+        } else {
+            banner.strokeColor = 0x33888888
+            banner.strokeWidth = (density * 1).toInt()
+        }
+    }
+
     // Toggle global Auto-URL from either the banner or the overflow menu, keeping both in sync.
     private fun applyGlobalAutoUrl(enabled: Boolean) {
         DataStore.globalAutoUrl = enabled
         autoUrlSwitch?.isChecked = enabled
+        updateAutoUrlBannerStyle()
         toolbar.menu?.findItem(R.id.action_global_auto_url)?.isChecked = enabled
         if (DataStore.serviceState.canStop) {
             runOnDefaultDispatcher {
@@ -254,13 +271,15 @@ class ConfigurationFragment @JvmOverloads constructor(
         tabLayout = view.findViewById(R.id.group_tab)
 
         // Visible Auto-URL toggle banner (instead of hiding it in the overflow menu).
-        val autoUrlBanner = view.findViewById<View>(R.id.auto_url_banner)
+        val banner = view.findViewById<MaterialCardView>(R.id.auto_url_banner)
+        autoUrlBanner = banner
         autoUrlSwitch = view.findViewById(R.id.auto_url_switch)
         if (select) {
-            autoUrlBanner.isGone = true
+            banner.isGone = true
         } else {
             autoUrlSwitch?.isChecked = DataStore.globalAutoUrl
-            autoUrlBanner.setOnClickListener { applyGlobalAutoUrl(!DataStore.globalAutoUrl) }
+            banner.setOnClickListener { applyGlobalAutoUrl(!DataStore.globalAutoUrl) }
+            updateAutoUrlBannerStyle()
         }
 
         adapter = GroupPagerAdapter()
@@ -1157,6 +1176,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         lateinit var undoManager: UndoSnackbarManager<ProxyEntity>
         var adapter: ConfigurationAdapter? = null
+        private var autoPingJob: Job? = null
 
         override fun onSaveInstanceState(outState: Bundle) {
             super.onSaveInstanceState(outState)
@@ -1283,6 +1303,62 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
             checkOrderMenu()
             configurationListView.requestFocus()
+            startAutoPing()
+        }
+
+        override fun onPause() {
+            super.onPause()
+            autoPingJob?.cancel()
+            autoPingJob = null
+        }
+
+        // Periodically refresh latency in the background (no dialog) while this list is visible,
+        // so pings update live — like podkop. Gated by a setting and the fragment lifecycle.
+        private fun startAutoPing() {
+            if (select || !DataStore.autoLatencyTest || autoPingJob != null) return
+            if (!::proxyGroup.isInitialized) return
+            autoPingJob = runOnDefaultDispatcher {
+                while (isActive) {
+                    silentLatencyTest()
+                    delay(DataStore.autoLatencyInterval.coerceAtLeast(3) * 1000L)
+                }
+            }
+        }
+
+        private suspend fun silentLatencyTest() {
+            if (DataStore.runningTest || !::proxyGroup.isInitialized) return
+            DataStore.runningTest = true
+            try {
+                coroutineScope {
+                    val profiles =
+                        ConcurrentLinkedQueue(SagerDatabase.proxyDao.getByGroup(proxyGroup.id))
+                    val jobs = mutableListOf<Job>()
+                    repeat(DataStore.connectionTestConcurrent) {
+                        jobs.add(launch(Dispatchers.IO) {
+                            val urlTest = UrlTest()
+                            while (isActive) {
+                                val profile = profiles.poll() ?: break
+                                try {
+                                    profile.status = 1
+                                    profile.ping = urlTest.doTest(profile)
+                                } catch (e: Exception) {
+                                    profile.status = 3
+                                    profile.error = e.readableMessage
+                                }
+                                try {
+                                    ProfileManager.updateProfile(profile)
+                                } catch (_: Exception) {
+                                }
+                            }
+                        })
+                    }
+                    jobs.joinAll()
+                }
+            } catch (e: Exception) {
+                Logs.w(e)
+            } finally {
+                DataStore.runningTest = false
+            }
         }
 
         fun checkOrderMenu() {

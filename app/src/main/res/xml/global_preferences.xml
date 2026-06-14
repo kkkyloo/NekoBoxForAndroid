@@ -96,6 +96,18 @@
             app:key="connectionTestConcurrent"
             app:title="Одновременных проверок пинга"
             app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="autoLatencyTest"
+            app:title="Авто-обновление пинга"
+            app:summary="Сам проверяет задержку, пока открыт список серверов" />
+        <EditTextPreference
+            app:defaultValue="10"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="autoLatencyInterval"
+            app:title="Интервал авто-пинга (сек)"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <!-- ===== Расширенные настройки (скрыты, раскрываются переключателем выше) ===== -->

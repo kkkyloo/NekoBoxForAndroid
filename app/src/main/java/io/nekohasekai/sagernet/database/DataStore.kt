@@ -103,6 +103,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var autoUrlCountryFilter by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER) { "" }
     var autoUrlGroupFilterMode by configurationStore.string(Key.AUTO_URL_GROUP_FILTER_MODE) { "0" } // 0 = exclude, 1 = include
     var autoUrlGroupFilter by configurationStore.string(Key.AUTO_URL_GROUP_FILTER) { "" }
+    var autoLatencyTest by configurationStore.boolean(Key.AUTO_LATENCY_TEST) { true }
+    var autoLatencyInterval by configurationStore.int(Key.AUTO_LATENCY_INTERVAL) { 10 }
     
     var confirmProfileDelete by configurationStore.boolean(Key.CONFIRM_PROFILE_DELETE) { true }
     var groupLayoutMode by configurationStore.stringToInt(Key.GROUP_LAYOUT_MODE) { 0 }

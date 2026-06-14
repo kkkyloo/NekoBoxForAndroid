@@ -346,6 +346,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
         findPreference<EditTextPreference>("connectionTestConcurrent")
             ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+        findPreference<EditTextPreference>(Key.AUTO_LATENCY_INTERVAL)
+            ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
     }
 
     override fun onResume() {
