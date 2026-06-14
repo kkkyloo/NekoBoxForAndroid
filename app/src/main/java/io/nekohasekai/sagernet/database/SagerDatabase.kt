@@ -46,7 +46,7 @@ abstract class SagerDatabase : RoomDatabase() {
                         `socksBean` BLOB,
                         `httpBean` BLOB,
                         `ssBean` BLOB,
-                        `ssrBean` BLOB,
+                        `ssrBean` BLOB DEFAULT NULL,
                         `vmessBean` BLOB,
                         `trojanBean` BLOB,
                         `trojanGoBean` BLOB,
@@ -62,7 +62,7 @@ abstract class SagerDatabase : RoomDatabase() {
                         `chainBean` BLOB,
                         `nekoBean` BLOB,
                         `configBean` BLOB,
-                        `snellBean` BLOB
+                        `snellBean` BLOB DEFAULT NULL
                     )
                 """.trimIndent())
                 
