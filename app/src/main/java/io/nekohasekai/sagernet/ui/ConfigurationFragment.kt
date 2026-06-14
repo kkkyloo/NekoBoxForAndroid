@@ -147,6 +147,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     lateinit var groupPager: ViewPager2
     private var autoUrlSwitch: SwitchMaterial? = null
     private var autoUrlBanner: MaterialCardView? = null
+    private var autoUrlActiveText: TextView? = null
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
 
@@ -212,11 +213,54 @@ class ConfigurationFragment @JvmOverloads constructor(
         }
     }
 
+    // Show which server Auto-URL is currently riding (lowest ping among eligible servers).
+    fun refreshAutoUrlActive() {
+        val text = autoUrlActiveText ?: return
+        if (!DataStore.globalAutoUrl) {
+            text.text = "Самый быстрый сервер автоматически"
+            return
+        }
+        runOnDefaultDispatcher {
+            try {
+                var list = SagerDatabase.proxyDao.getAll().filter {
+                    it.type != ProxyEntity.TYPE_NEKO && it.type != ProxyEntity.TYPE_CHAIN
+                }
+                val filters = DataStore.autoUrlCountryFilter.split(",")
+                    .map { it.trim().lowercase() }.filter { it.isNotEmpty() }
+                if (filters.isNotEmpty()) {
+                    val mode = DataStore.autoUrlCountryFilterMode.toIntOrNull() ?: 0
+                    list = list.filter { p ->
+                        val matches = filters.any { p.displayName().lowercase().contains(it) }
+                        if (mode == 1) matches else !matches
+                    }
+                }
+                val best = list.filter { it.status == 1 && it.ping > 0 }.minByOrNull { it.ping }
+                onMainDispatcher {
+                    autoUrlActiveText?.text = if (best != null) {
+                        "Сейчас: ${best.displayName()} · ${best.ping} ms"
+                    } else {
+                        "Подбор сервера…"
+                    }
+                }
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    // Called when the user manually taps a server — Auto-URL and manual pick are mutually exclusive.
+    fun setAutoUrlVisualOff() {
+        autoUrlSwitch?.isChecked = false
+        updateAutoUrlBannerStyle()
+        refreshAutoUrlActive()
+        toolbar.menu?.findItem(R.id.action_global_auto_url)?.isChecked = false
+    }
+
     // Toggle global Auto-URL from either the banner or the overflow menu, keeping both in sync.
     private fun applyGlobalAutoUrl(enabled: Boolean) {
         DataStore.globalAutoUrl = enabled
         autoUrlSwitch?.isChecked = enabled
         updateAutoUrlBannerStyle()
+        refreshAutoUrlActive()
         toolbar.menu?.findItem(R.id.action_global_auto_url)?.isChecked = enabled
         if (DataStore.serviceState.canStop) {
             runOnDefaultDispatcher {
@@ -274,12 +318,14 @@ class ConfigurationFragment @JvmOverloads constructor(
         val banner = view.findViewById<MaterialCardView>(R.id.auto_url_banner)
         autoUrlBanner = banner
         autoUrlSwitch = view.findViewById(R.id.auto_url_switch)
+        autoUrlActiveText = view.findViewById(R.id.auto_url_active)
         if (select) {
             banner.isGone = true
         } else {
             autoUrlSwitch?.isChecked = DataStore.globalAutoUrl
             banner.setOnClickListener { applyGlobalAutoUrl(!DataStore.globalAutoUrl) }
             updateAutoUrlBannerStyle()
+            refreshAutoUrlActive()
         }
 
         adapter = GroupPagerAdapter()
@@ -1764,6 +1810,8 @@ class ConfigurationFragment @JvmOverloads constructor(
                         configurationListView.scrollTo(0, true)
                     }
 
+                    (this@GroupFragment.parentFragment as? ConfigurationFragment)
+                        ?.refreshAutoUrlActive()
                 }
             }
 
@@ -1849,6 +1897,14 @@ class ConfigurationFragment @JvmOverloads constructor(
                 } else {
                     view.setOnClickListener {
                         runOnDefaultDispatcher {
+                            // Manual pick and Auto-URL are mutually exclusive — turn Auto off.
+                            if (DataStore.globalAutoUrl) {
+                                DataStore.globalAutoUrl = false
+                                onMainDispatcher {
+                                    (this@GroupFragment.parentFragment as? ConfigurationFragment)
+                                        ?.setAutoUrlVisualOff()
+                                }
+                            }
                             var update: Boolean
                             var lastSelected: Long
                             profileAccess.withLock {
@@ -2039,7 +2095,8 @@ class ConfigurationFragment @JvmOverloads constructor(
                 }
 
                 runOnDefaultDispatcher {
-                    val selected = (selectedItem?.id ?: DataStore.selectedProxy) == proxyEntity.id
+                    val selected = !DataStore.globalAutoUrl &&
+                        (selectedItem?.id ?: DataStore.selectedProxy) == proxyEntity.id
                     val started =
                         selected && DataStore.serviceState.started && DataStore.currentProfile == proxyEntity.id
                     onMainDispatcher {

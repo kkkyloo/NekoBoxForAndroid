@@ -589,7 +589,6 @@ fun buildConfig(
                 outbounds = tagMap.values.toList()
                 url = DataStore.autoUrlTestUrl.takeIf { it.isNotBlank() } ?: "https://cp.cloudflare.com/generate_204"
                 tolerance = DataStore.autoUrlTolerance.takeIf { it > 0 } ?: 50
-                interval = "1m"
             })
         } else if (buildSelector) {
             val list = group.id.let { SagerDatabase.proxyDao.getByGroup(it) }
