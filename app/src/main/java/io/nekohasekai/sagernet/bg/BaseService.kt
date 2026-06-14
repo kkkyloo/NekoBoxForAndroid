@@ -319,12 +319,15 @@ class BaseService {
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
             var profile = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
             if (profile == null && DataStore.globalAutoUrl) {
-                profile = io.nekohasekai.sagernet.database.ProxyEntity(type = io.nekohasekai.sagernet.database.ProxyEntity.TYPE_CONFIG).apply {
-                    id = -999L
-                    configBean = moe.matsuri.nb4a.proxy.config.ConfigBean().apply {
-                        name = "🌐 Умный авто-выбор"
-                    }
-                }
+                // Use a real proxy as the carrier — the global urltest picks the best server at
+                // runtime regardless. A fake TYPE_CONFIG profile with no real bean crashed config
+                // building (NPE) because buildConfig short-circuits the TYPE_CONFIG branch.
+                val all = SagerDatabase.proxyDao.getAll()
+                profile = all.firstOrNull {
+                    it.type != io.nekohasekai.sagernet.database.ProxyEntity.TYPE_CONFIG &&
+                        it.type != io.nekohasekai.sagernet.database.ProxyEntity.TYPE_NEKO &&
+                        it.type != io.nekohasekai.sagernet.database.ProxyEntity.TYPE_CHAIN
+                } ?: all.firstOrNull()
             }
             this as Context
             if (profile == null) { // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107

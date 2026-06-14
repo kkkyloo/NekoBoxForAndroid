@@ -348,6 +348,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
         findPreference<EditTextPreference>(Key.AUTO_LATENCY_INTERVAL)
             ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+        findPreference<EditTextPreference>(Key.AUTO_URL_TOLERANCE)
+            ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
     }
 
     override fun onResume() {

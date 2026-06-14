@@ -55,6 +55,13 @@
             app:key="autoUrlTestUrl"
             app:title="URL для тестирования задержки"
             app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="50"
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="autoUrlTolerance"
+            app:title="Порог переключения (мс)"
+            app:summary="Меняет сервер, только если другой быстрее текущего на столько мс"
+            app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:defaultValue="0"
             app:entries="@array/filter_mode_entries"

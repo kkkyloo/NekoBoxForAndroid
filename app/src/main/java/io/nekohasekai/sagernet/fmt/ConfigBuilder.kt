@@ -70,7 +70,7 @@ fun buildConfig(
     proxy: ProxyEntity, forTest: Boolean = false, forExport: Boolean = false
 ): ConfigBuildResult {
 
-    if (proxy.type == TYPE_CONFIG) {
+    if (proxy.type == TYPE_CONFIG && !(DataStore.globalAutoUrl && !forTest)) {
         val bean = proxy.requireBean() as ConfigBean
         if (bean.type == 0) {
             val tagProxy = proxy.displayName()
@@ -588,7 +588,8 @@ fun buildConfig(
                 tag = TAG_PROXY
                 outbounds = tagMap.values.toList()
                 url = DataStore.autoUrlTestUrl.takeIf { it.isNotBlank() } ?: "https://cp.cloudflare.com/generate_204"
-                tolerance = 50
+                tolerance = DataStore.autoUrlTolerance.takeIf { it > 0 } ?: 50
+                interval = "1m"
             })
         } else if (buildSelector) {
             val list = group.id.let { SagerDatabase.proxyDao.getByGroup(it) }

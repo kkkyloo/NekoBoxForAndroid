@@ -100,9 +100,10 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var globalAutoUrl by configurationStore.boolean(Key.GLOBAL_AUTO_URL) { false }
     var autoUrlTestUrl by configurationStore.string(Key.AUTO_URL_TEST_URL) { "https://cp.cloudflare.com/generate_204" }
     var autoUrlCountryFilterMode by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER_MODE) { "0" } // 0 = exclude, 1 = include
-    var autoUrlCountryFilter by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER) { "" }
+    var autoUrlCountryFilter by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER) { "🇷🇺,россия,russia" }
     var autoUrlGroupFilterMode by configurationStore.string(Key.AUTO_URL_GROUP_FILTER_MODE) { "0" } // 0 = exclude, 1 = include
     var autoUrlGroupFilter by configurationStore.string(Key.AUTO_URL_GROUP_FILTER) { "" }
+    var autoUrlTolerance by configurationStore.int(Key.AUTO_URL_TOLERANCE) { 50 }
     var autoLatencyTest by configurationStore.boolean(Key.AUTO_LATENCY_TEST) { true }
     var autoLatencyInterval by configurationStore.int(Key.AUTO_LATENCY_INTERVAL) { 10 }
     

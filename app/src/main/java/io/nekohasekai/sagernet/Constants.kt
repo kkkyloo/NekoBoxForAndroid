@@ -43,6 +43,7 @@ object Key {
     const val AUTO_URL_COUNTRY_FILTER = "autoUrlCountryFilter"
     const val AUTO_URL_GROUP_FILTER_MODE = "autoUrlGroupFilterMode"
     const val AUTO_URL_GROUP_FILTER = "autoUrlGroupFilter"
+    const val AUTO_URL_TOLERANCE = "autoUrlTolerance"
     const val AUTO_LATENCY_TEST = "autoLatencyTest"
     const val AUTO_LATENCY_INTERVAL = "autoLatencyInterval"
 
