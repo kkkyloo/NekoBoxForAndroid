@@ -21,8 +21,7 @@ import kotlinx.coroutines.launch
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6),
-        AutoMigration(from = 6, to = 7),
-        AutoMigration(from = 7, to = 8)
+        AutoMigration(from = 6, to = 7)
     ]
 )
 @TypeConverters(value = [KryoConverters::class, GsonConverters::class])
@@ -30,12 +29,75 @@ import kotlinx.coroutines.launch
 abstract class SagerDatabase : RoomDatabase() {
 
     companion object {
+        val MIGRATION_7_8 = object : androidx.room.migration.Migration(7, 8) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `proxy_entities_new` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `groupId` INTEGER NOT NULL,
+                        `type` INTEGER NOT NULL,
+                        `userOrder` INTEGER NOT NULL,
+                        `tx` INTEGER NOT NULL,
+                        `rx` INTEGER NOT NULL,
+                        `status` INTEGER NOT NULL,
+                        `ping` INTEGER NOT NULL,
+                        `uuid` TEXT NOT NULL,
+                        `error` TEXT,
+                        `socksBean` BLOB,
+                        `httpBean` BLOB,
+                        `ssBean` BLOB,
+                        `ssrBean` BLOB,
+                        `vmessBean` BLOB,
+                        `trojanBean` BLOB,
+                        `trojanGoBean` BLOB,
+                        `mieruBean` BLOB,
+                        `naiveBean` BLOB,
+                        `hysteriaBean` BLOB,
+                        `tuicBean` BLOB,
+                        `juicityBean` BLOB,
+                        `sshBean` BLOB,
+                        `wgBean` BLOB,
+                        `shadowTLSBean` BLOB,
+                        `anyTLSBean` BLOB,
+                        `chainBean` BLOB,
+                        `nekoBean` BLOB,
+                        `configBean` BLOB,
+                        `snellBean` BLOB
+                    )
+                """.trimIndent())
+                
+                val cursor = database.query("PRAGMA table_info(proxy_entities)")
+                val existingColumns = mutableListOf<String>()
+                while (cursor.moveToNext()) {
+                    existingColumns.add(cursor.getString(1))
+                }
+                cursor.close()
+
+                val targetColumns = listOf(
+                    "id", "groupId", "type", "userOrder", "tx", "rx", "status", "ping", "uuid", "error",
+                    "socksBean", "httpBean", "ssBean", "ssrBean", "vmessBean", "trojanBean", "trojanGoBean",
+                    "mieruBean", "naiveBean", "hysteriaBean", "tuicBean", "juicityBean", "sshBean", "wgBean",
+                    "shadowTLSBean", "anyTLSBean", "chainBean", "nekoBean", "configBean", "snellBean"
+                )
+                val columnsToCopy = existingColumns.filter { targetColumns.contains(it) }
+                val columnsCsv = columnsToCopy.joinToString(", ") { "`$it`" }
+
+                if (columnsCsv.isNotEmpty()) {
+                    database.execSQL("INSERT INTO `proxy_entities_new` ($columnsCsv) SELECT $columnsCsv FROM `proxy_entities`")
+                }
+
+                database.execSQL("DROP TABLE `proxy_entities`")
+                database.execSQL("ALTER TABLE `proxy_entities_new` RENAME TO `proxy_entities`")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `groupId` ON `proxy_entities` (`groupId`)")
+            }
+        }
+
         @OptIn(DelicateCoroutinesApi::class)
         @Suppress("EXPERIMENTAL_API_USAGE")
         val instance by lazy {
             SagerNet.application.getDatabasePath(Key.DB_PROFILE).parentFile?.mkdirs()
             Room.databaseBuilder(SagerNet.application, SagerDatabase::class.java, Key.DB_PROFILE)
-//                .addMigrations(*SagerDatabase_Migrations.build())
+                .addMigrations(MIGRATION_7_8)
                 .setJournalMode(JournalMode.TRUNCATE)
                 .allowMainThreadQueries()
                 .enableMultiInstanceInvalidation()
