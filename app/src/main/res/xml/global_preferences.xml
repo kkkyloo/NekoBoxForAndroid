@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    
-    <PreferenceCategory app:title="@string/general_settings">
+
+    <!-- ⭐ Основное: то, что нужно обычному пользователю -->
+    <PreferenceCategory
+        app:key="category_main"
+        app:title="⭐ Основное">
         <SwitchPreference
             app:defaultValue="false"
             app:icon="@drawable/ic_communication_phonelink_ring"
             app:key="isAutoConnect"
             app:summary="@string/auto_connect_summary"
             app:title="@string/auto_connect" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:defaultValue="vpn"
+            app:entries="@array/service_modes"
+            app:entryValues="@array/service_mode_values"
+            app:icon="@drawable/ic_device_developer_mode"
+            app:key="serviceMode"
+            app:title="@string/service_mode"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/ic_navigation_apps"
+            app:key="proxyApps"
+            app:summary="@string/proxied_apps_summary"
+            app:title="@string/proxied_apps" />
         <moe.matsuri.nb4a.ui.ColorPickerPreference
             android:title="@string/theme"
             app:icon="@drawable/ic_baseline_color_lens_24"
             app:key="appTheme" />
-        <moe.matsuri.nb4a.ui.SimpleMenuPreference
-            app:defaultValue="0"
-            app:entries="@array/night_mode"
-            app:entryValues="@array/int_array_4"
-            app:icon="@drawable/ic_baseline_wb_sunny_24"
-            app:key="nightTheme"
-            app:title="@string/night_mode"
-            app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:defaultValue=""
             app:entries="@array/language_entries"
@@ -29,13 +37,67 @@
             app:key="appLanguage"
             app:title="@string/language"
             app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:defaultValue="false"
+            app:icon="@drawable/baseline_developer_board_24"
+            app:key="advancedSettingsVisible"
+            app:title="Показать расширенные настройки"
+            app:summary="DNS, маршрутизация, фрагментация и прочее" />
+    </PreferenceCategory>
+
+    <!-- 🌐 Умный автовыбор (Auto-URL) -->
+    <PreferenceCategory
+        app:key="category_autourl"
+        app:title="🌐 Умный автовыбор (Auto-URL)">
+        <EditTextPreference
+            app:defaultValue="https://cp.cloudflare.com/generate_204"
+            app:icon="@drawable/ic_baseline_cast_connected_24"
+            app:key="autoUrlTestUrl"
+            app:title="URL для тестирования задержки"
+            app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
-            app:defaultValue="vpn"
-            app:entries="@array/service_modes"
-            app:entryValues="@array/service_mode_values"
-            app:icon="@drawable/ic_device_developer_mode"
-            app:key="serviceMode"
-            app:title="@string/service_mode"
+            app:defaultValue="0"
+            app:entries="@array/filter_mode_entries"
+            app:entryValues="@array/filter_mode_values"
+            app:icon="@drawable/baseline_public_24"
+            app:key="autoUrlCountryFilterMode"
+            app:title="Режим фильтрации стран"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue=""
+            app:icon="@drawable/ic_baseline_edit_24"
+            app:key="autoUrlCountryFilter"
+            app:title="Коды стран (через запятую)"
+            app:summary="Например: RU, UA, BY" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:defaultValue="0"
+            app:entries="@array/filter_mode_entries"
+            app:entryValues="@array/filter_mode_values"
+            app:icon="@drawable/baseline_apps_24"
+            app:key="autoUrlGroupFilterMode"
+            app:title="Режим фильтрации подписок"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue=""
+            app:icon="@drawable/ic_baseline_edit_24"
+            app:key="autoUrlGroupFilter"
+            app:title="ID подписок (через запятую)"
+            app:summary="Оставьте пустым для тестирования всех" />
+    </PreferenceCategory>
+
+    <!-- ===== Расширенные настройки (скрыты, раскрываются переключателем выше) ===== -->
+
+    <PreferenceCategory
+        app:key="category_interface"
+        app:isPreferenceVisible="false"
+        app:title="@string/general_settings">
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:defaultValue="0"
+            app:entries="@array/night_mode"
+            app:entryValues="@array/int_array_4"
+            app:icon="@drawable/ic_baseline_wb_sunny_24"
+            app:key="nightTheme"
+            app:title="@string/night_mode"
             app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
             app:defaultValue="0"
@@ -112,12 +174,11 @@
             app:title="@string/custom_config"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
-    <PreferenceCategory app:title="@string/cag_route">
-        <SwitchPreference
-            app:icon="@drawable/ic_navigation_apps"
-            app:key="proxyApps"
-            app:summary="@string/proxied_apps_summary"
-            app:title="@string/proxied_apps" />
+
+    <PreferenceCategory
+        app:key="category_route"
+        app:isPreferenceVisible="false"
+        app:title="@string/cag_route">
         <SwitchPreference
             app:icon="@drawable/ic_baseline_legend_toggle_24"
             app:key="bypassLan"
@@ -177,7 +238,10 @@
             app:summary="@string/ruleset_update_interval_summary" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/fragment_settings">
+    <PreferenceCategory
+        app:key="category_fragment"
+        app:isPreferenceVisible="false"
+        app:title="@string/fragment_settings">
         <SwitchPreference
             app:key="enableTLSFragment"
             app:title="@string/enable_tls_fragment" />
@@ -193,7 +257,10 @@
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/cag_dns">
+    <PreferenceCategory
+        app:key="category_dns"
+        app:isPreferenceVisible="false"
+        app:title="@string/cag_dns">
         <EditTextPreference
       app:defaultValue="https://dns.google/dns-query"
             app:icon="@drawable/ic_action_dns"
@@ -207,11 +274,11 @@
             app:key="domain_strategy_for_remote"
             app:title="@string/domain_strategy_for_remote"
             app:useSimpleSummaryProvider="true" />
-            
+
         <!-- === НАЧАЛО БЛОКА DNS === -->
         <SwitchPreference
             app:defaultValue="false"
-            app:icon="@drawable/ic_action_dns" 
+            app:icon="@drawable/ic_action_dns"
             app:key="useLocalDns"
             app:title="Использовать системный DNS (local)"
             app:summary="Использовать DNS провайдера или кастомный из настроек DNS Android."
@@ -219,7 +286,7 @@
 
         <EditTextPreference
             app:dependency="useLocalDns"
-            app:defaultValue="8.8.8.8" 
+            app:defaultValue="8.8.8.8"
             app:icon="@drawable/ic_action_dns"
             app:key="directDns"
             app:title="@string/direct_dns"
@@ -255,41 +322,20 @@
             app:title="@string/enable_fakedns" />
     </PreferenceCategory>
 
-    <PreferenceCategory 
+    <PreferenceCategory
         app:title="@string/inbound_settings"
         app:isPreferenceVisible="false">
-        
+
         <SwitchPreference
             app:key="enableLocalProxyInVpn"
             app:isPreferenceVisible="false" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <EditTextPreference
-
             app:key="mixedPort"
             app:isPreferenceVisible="false" />
-
-
         <EditTextPreference
-
             app:key="mixedUsername"
             app:isPreferenceVisible="false" />
-
-
         <EditTextPreference
-
             app:key="mixedPassword"
             app:isPreferenceVisible="false" />
         <SwitchPreference
@@ -302,11 +348,13 @@
         <SwitchPreference
             app:icon="@drawable/ic_baseline_nat_24"
             app:key="allowAccess"
-            app:isPreferenceVisible="false" /> 
+            app:isPreferenceVisible="false" />
     </PreferenceCategory>
 
-
-    <PreferenceCategory app:title="@string/cag_misc">
+    <PreferenceCategory
+        app:key="category_misc"
+        app:isPreferenceVisible="false"
+        app:title="@string/cag_misc">
         <moe.matsuri.nb4a.ui.UrlTestPreference
             app:defaultValue="https://cp.cloudflare.com/"
             app:icon="@drawable/ic_baseline_cast_connected_24"
@@ -356,71 +404,34 @@
             app:summary="@string/clear_cache_summary" />
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="Продвинутый Умный автовыбор">
+    <PreferenceCategory
+        app:title="VPN Watchdog (Авто-рестарт)"
+        app:isPreferenceVisible="false">
+
+        <SwitchPreference
+            app:defaultValue="false"
+            app:icon="@drawable/ic_baseline_flip_camera_android_24"
+            app:key="vpnWatchdogEnabled"
+            app:title="@string/vpn_watchdog"
+            app:summary="@string/vpn_watchdog_summary"
+            app:isPreferenceVisible="false" />
+
         <EditTextPreference
-            app:defaultValue="https://cp.cloudflare.com/generate_204"
-            app:icon="@drawable/ic_baseline_cast_connected_24"
-            app:key="autoUrlTestUrl"
-            app:title="URL для тестирования задержки"
-            app:useSimpleSummaryProvider="true" />
-        <moe.matsuri.nb4a.ui.SimpleMenuPreference
-            app:defaultValue="0"
-            app:entries="@array/filter_mode_entries"
-            app:entryValues="@array/filter_mode_values"
-            app:icon="@drawable/baseline_public_24"
-            app:key="autoUrlCountryFilterMode"
-            app:title="Режим фильтрации стран"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:defaultValue=""
-            app:icon="@drawable/ic_baseline_edit_24"
-            app:key="autoUrlCountryFilter"
-            app:title="Коды стран (через запятую)"
-            app:summary="Например: RU, UA, BY" />
-        <moe.matsuri.nb4a.ui.SimpleMenuPreference
-            app:defaultValue="0"
-            app:entries="@array/filter_mode_entries"
-            app:entryValues="@array/filter_mode_values"
-            app:icon="@drawable/baseline_apps_24"
-            app:key="autoUrlGroupFilterMode"
-            app:title="Режим фильтрации подписок"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:defaultValue=""
-            app:icon="@drawable/ic_baseline_edit_24"
-            app:key="autoUrlGroupFilter"
-            app:title="ID подписок (через запятую)"
-            app:summary="Оставьте пустым для тестирования всех" />
+            app:defaultValue="7"
+            app:dependency="vpnWatchdogEnabled"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="vpnWatchdogInterval"
+            app:title="@string/vpn_watchdog_interval"
+            app:useSimpleSummaryProvider="true"
+            app:isPreferenceVisible="false" />
+
+        <Preference
+            app:dependency="vpnWatchdogEnabled"
+            app:icon="@drawable/ic_baseline_bug_report_24"
+            app:key="vpnWatchdogTest"
+            app:title="@string/vpn_watchdog_test"
+            app:summary="@string/vpn_watchdog_test_summary"
+            app:isPreferenceVisible="false" />
+
     </PreferenceCategory>
-
-  <PreferenceCategory
-    app:title="VPN Watchdog (Авто-рестарт)"
-    app:isPreferenceVisible="false">
-
-    <SwitchPreference
-        app:defaultValue="false"
-        app:icon="@drawable/ic_baseline_flip_camera_android_24"
-        app:key="vpnWatchdogEnabled"
-        app:title="@string/vpn_watchdog"
-        app:summary="@string/vpn_watchdog_summary"
-        app:isPreferenceVisible="false" />
-
-    <EditTextPreference
-        app:defaultValue="7"
-        app:dependency="vpnWatchdogEnabled"
-        app:icon="@drawable/ic_baseline_shutter_speed_24"
-        app:key="vpnWatchdogInterval"
-        app:title="@string/vpn_watchdog_interval"
-        app:useSimpleSummaryProvider="true"
-        app:isPreferenceVisible="false" />
-
-    <Preference
-        app:dependency="vpnWatchdogEnabled"
-        app:icon="@drawable/ic_baseline_bug_report_24"
-        app:key="vpnWatchdogTest"
-        app:title="@string/vpn_watchdog_test"
-        app:summary="@string/vpn_watchdog_test_summary"
-        app:isPreferenceVisible="false" />
-
-</PreferenceCategory>
 </PreferenceScreen>

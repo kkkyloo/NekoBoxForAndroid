@@ -323,6 +323,23 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             }.show()
             true
         }
+
+        // Keep the settings screen simple: hide advanced categories behind one toggle.
+        val advancedCategories = listOf(
+            "category_interface", "category_route", "category_fragment",
+            "category_dns", "category_misc",
+        )
+        fun applyAdvancedVisibility(visible: Boolean) {
+            advancedCategories.forEach { key ->
+                findPreference<PreferenceCategory>(key)?.isVisible = visible
+            }
+        }
+        applyAdvancedVisibility(DataStore.advancedSettingsVisible)
+        findPreference<SwitchPreference>(Key.ADVANCED_SETTINGS_VISIBLE)
+            ?.setOnPreferenceChangeListener { _, newValue ->
+                applyAdvancedVisibility(newValue as Boolean)
+                true
+            }
     }
 
     override fun onResume() {

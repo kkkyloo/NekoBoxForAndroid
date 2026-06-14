@@ -80,6 +80,7 @@ object Key {
     const val ACQUIRE_WAKE_LOCK = "acquireWakeLock"
     const val HIDE_FROM_RECENT_APPS = "hideFromRecentApps"
     const val SHOW_BOTTOM_BAR = "showBottomBar"
+    const val ADVANCED_SETTINGS_VISIBLE = "advancedSettingsVisible"
     const val CONFIRM_PROFILE_DELETE = "confirmProfileDelete"
     const val GROUP_LAYOUT_MODE = "groupLayoutMode"
 
