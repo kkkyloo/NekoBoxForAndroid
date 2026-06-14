@@ -172,8 +172,7 @@ fun Project.setupApp() {
             isUniversalApk = false
             include("armeabi-v7a")
             include("arm64-v8a")
-            include("x86")
-            include("x86_64")
+            // x86 / x86_64 are emulator/Intel only — phones don't need them, skip to speed up builds
         }
 
         flavorDimensions += "vendor"
