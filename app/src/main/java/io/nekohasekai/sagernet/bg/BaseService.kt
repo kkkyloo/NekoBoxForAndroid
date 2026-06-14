@@ -204,7 +204,7 @@ class BaseService {
         fun canReloadSelector(): Boolean {
             if ((data.proxy?.config?.selectorGroupId ?: -1L) < 0) return false
             val ent = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
-            if (ent == null && !DataStore.globalAutoUrl) return false
+            if (ent == null) return false
             val tmpBox = ProxyInstance(ent)
             tmpBox.buildConfigTmp()
             if (tmpBox.lastSelectorGroupId == data.proxy?.lastSelectorGroupId) {
@@ -321,7 +321,10 @@ class BaseService {
             if (profile == null && DataStore.globalAutoUrl) {
                 profile = io.nekohasekai.sagernet.database.ProxyEntity(type = io.nekohasekai.sagernet.database.ProxyEntity.TYPE_CONFIG).apply {
                     id = -999L
-                    displayName = "🌐 Умный авто-выбор"
+                    userRemarks = "🌐 Умный авто-выбор"
+                    configBean = moe.matsuri.nb4a.proxy.config.ConfigBean().apply {
+                        name = "🌐 Умный авто-выбор"
+                    }
                 }
             }
             this as Context

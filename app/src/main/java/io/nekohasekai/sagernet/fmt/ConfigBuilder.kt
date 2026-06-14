@@ -545,7 +545,6 @@ fun buildConfig(
                 tag = TAG_PROXY
                 outbounds = tagMap.values.toList()
                 url = "https://cp.cloudflare.com/generate_204"
-                interval = "3m"
                 tolerance = 50
             })
         } else if (buildSelector) {
