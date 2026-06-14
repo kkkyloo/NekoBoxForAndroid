@@ -29,16 +29,19 @@
         app:key="groupIsSelector"
         app:title="@string/use_selector" />
 
+    <!-- Advanced proxy-chaining (confusing for typical users) — hidden to declutter. -->
     <io.nekohasekai.sagernet.widget.OutboundPreference
         app:icon="@drawable/ic_hardware_router"
         app:key="groupFrontProxy"
         app:title="@string/front_proxy"
+        app:isPreferenceVisible="false"
         app:useSimpleSummaryProvider="true" />
 
     <io.nekohasekai.sagernet.widget.OutboundPreference
         app:icon="@drawable/baseline_public_24"
         app:key="groupLandingProxy"
         app:title="@string/landing_proxy"
+        app:isPreferenceVisible="false"
         app:useSimpleSummaryProvider="true" />
 
     <PreferenceCategory

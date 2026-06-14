@@ -341,8 +341,8 @@
 <string name="protocol_param">Параметры протокола</string>
 <string name="protocol_settings">Настройки протокола</string>
 <string name="protocol_version">Версия протокола</string>
-<string name="proxied_apps">Режим VPN для приложений</string>
-<string name="proxied_apps_summary">Настроить режим VPN для выбранных приложений</string>
+<string name="proxied_apps">Приложения для VPN</string>
+<string name="proxied_apps_summary">Выберите, какие приложения пускать через VPN (остальные идут напрямую)</string>
 <string name="proxy_cat">Настройки сервера</string>
 <string name="proxy_chain">Прокси-цепочка</string>
 <string name="quick_toggle">Переключить</string>

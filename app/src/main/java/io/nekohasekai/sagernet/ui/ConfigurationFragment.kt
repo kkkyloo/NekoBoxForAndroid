@@ -438,23 +438,10 @@ class ConfigurationFragment @JvmOverloads constructor(
                             import(proxies)
                         }
                     } catch (e: SubscriptionFoundException) {
+                        // Import the subscription directly instead of opening the group editor.
+                        // The group can still be edited later via long-press.
                         onMainDispatcher {
-                            if (e.link.startsWith("sn://")) {
-                                (requireActivity() as MainActivity).importSubscription(e.link.toUri())
-                            } else {
-                                val subscriptionLink = Uri.parse(e.link).getQueryParameter("url") ?: e.link
-
-                                val group = ProxyGroup(type = GroupType.SUBSCRIPTION)
-                                val subscription = SubscriptionBean()
-                                group.subscription = subscription
-                                subscription.link = subscriptionLink
-                                subscription.autoUpdate = false
-                                group.name = ""
-                                startActivity(Intent(requireContext(), GroupSettingsActivity::class.java).apply {
-                                    putExtra(GroupSettingsActivity.EXTRA_FROM_CLIPBOARD, true)
-                                    putExtra(GroupSettingsActivity.EXTRA_GROUP_SUBSCRIPTION_LINK, subscriptionLink)
-                                })
-                            }
+                            (requireActivity() as MainActivity).importSubscription(e.link.toUri())
                         }
                     } catch (e: Exception) {
                         Logs.w(e)
