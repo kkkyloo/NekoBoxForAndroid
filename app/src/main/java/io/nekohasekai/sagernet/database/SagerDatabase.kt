@@ -89,6 +89,18 @@ abstract class SagerDatabase : RoomDatabase() {
                 database.execSQL("DROP TABLE `proxy_entities`")
                 database.execSQL("ALTER TABLE `proxy_entities_new` RENAME TO `proxy_entities`")
                 database.execSQL("CREATE INDEX IF NOT EXISTS `groupId` ON `proxy_entities` (`groupId`)")
+
+                // The `rules` table gained a `ruleset` column (TEXT NOT NULL DEFAULT '') in v8.
+                // Older fork DBs at "version 7" may lack it, which fails schema validation.
+                val rulesCursor = database.query("PRAGMA table_info(`rules`)")
+                val ruleColumns = mutableListOf<String>()
+                while (rulesCursor.moveToNext()) {
+                    ruleColumns.add(rulesCursor.getString(1))
+                }
+                rulesCursor.close()
+                if (!ruleColumns.contains("ruleset")) {
+                    database.execSQL("ALTER TABLE `rules` ADD COLUMN `ruleset` TEXT NOT NULL DEFAULT ''")
+                }
             }
         }
 
