@@ -83,6 +83,19 @@
             app:key="autoUrlGroupFilter"
             app:title="ID подписок (через запятую)"
             app:summary="Оставьте пустым для тестирования всех" />
+        <EditTextPreference
+            app:defaultValue="3000"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="connectionTestTimeout"
+            app:title="Таймаут пинга (мс)"
+            app:summary="Сколько ждать ответа при проверке задержки"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="5"
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="connectionTestConcurrent"
+            app:title="Одновременных проверок пинга"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <!-- ===== Расширенные настройки (скрыты, раскрываются переключателем выше) ===== -->

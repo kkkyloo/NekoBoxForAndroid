@@ -340,6 +340,12 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 applyAdvancedVisibility(newValue as Boolean)
                 true
             }
+
+        // Ping/latency test tuning (numeric input).
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_TIMEOUT)
+            ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+        findPreference<EditTextPreference>("connectionTestConcurrent")
+            ?.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
     }
 
     override fun onResume() {

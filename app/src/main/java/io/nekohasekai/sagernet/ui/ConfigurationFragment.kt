@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -143,6 +144,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     lateinit var adapter: GroupPagerAdapter
     lateinit var tabLayout: TabLayout
     lateinit var groupPager: ViewPager2
+    private var autoUrlSwitch: SwitchMaterial? = null
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
 
@@ -194,6 +196,32 @@ class ConfigurationFragment @JvmOverloads constructor(
         }
     }
 
+    // Toggle global Auto-URL from either the banner or the overflow menu, keeping both in sync.
+    private fun applyGlobalAutoUrl(enabled: Boolean) {
+        DataStore.globalAutoUrl = enabled
+        autoUrlSwitch?.isChecked = enabled
+        toolbar.menu?.findItem(R.id.action_global_auto_url)?.isChecked = enabled
+        if (DataStore.serviceState.canStop) {
+            runOnDefaultDispatcher {
+                try {
+                    delay(500)
+                    snackbar(getString(R.string.need_reload)).setAction(R.string.apply) {
+                        runOnDefaultDispatcher {
+                            try {
+                                delay(100)
+                                SagerNet.reloadService()
+                            } catch (e: Exception) {
+                                Logs.w(e)
+                                onMainDispatcher { snackbar(getString(R.string.service_failed)).show() }
+                            }
+                        }
+                    }.show()
+                } catch (e: Exception) {
+                }
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -224,6 +252,17 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         groupPager = view.findViewById(R.id.group_pager)
         tabLayout = view.findViewById(R.id.group_tab)
+
+        // Visible Auto-URL toggle banner (instead of hiding it in the overflow menu).
+        val autoUrlBanner = view.findViewById<View>(R.id.auto_url_banner)
+        autoUrlSwitch = view.findViewById(R.id.auto_url_switch)
+        if (select) {
+            autoUrlBanner.isGone = true
+        } else {
+            autoUrlSwitch?.isChecked = DataStore.globalAutoUrl
+            autoUrlBanner.setOnClickListener { applyGlobalAutoUrl(!DataStore.globalAutoUrl) }
+        }
+
         adapter = GroupPagerAdapter()
         ProfileManager.addListener(adapter)
         GroupManager.addListener(adapter)
@@ -637,26 +676,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
 
             R.id.action_global_auto_url -> {
-                item.isChecked = !item.isChecked
-                DataStore.globalAutoUrl = item.isChecked
-                if (DataStore.serviceState.canStop) {
-                    runOnDefaultDispatcher {
-                        try {
-                            delay(500)
-                            snackbar(getString(R.string.need_reload)).setAction(R.string.apply) {
-                                runOnDefaultDispatcher {
-                                    try {
-                                        delay(100)
-                                        SagerNet.reloadService()
-                                    } catch (e: Exception) {
-                                        Logs.w(e)
-                                        onMainDispatcher { snackbar(getString(R.string.service_failed)).show() }
-                                    }
-                                }
-                            }.show()
-                        } catch (e: Exception) {}
-                    }
-                }
+                applyGlobalAutoUrl(!DataStore.globalAutoUrl)
             }
 
             R.id.action_global_mode -> {
