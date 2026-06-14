@@ -9,7 +9,7 @@ pushd ..
 ####
 
 if [ ! -d "sing-box" ]; then
-  git clone --no-checkout https://github.com/shtorm-7/sing-box-extended.git sing-box
+  git clone --no-checkout https://github.com/starifly/sing-box.git sing-box
 fi
 pushd sing-box
 git checkout "$COMMIT_SING_BOX"
