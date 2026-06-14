@@ -536,7 +536,34 @@ fun buildConfig(
 
         // build outbounds
         if (DataStore.globalAutoUrl && !forTest) {
-            val list = SagerDatabase.proxyDao.getAll().filter { it.type != ProxyEntity.TYPE_CONFIG && it.type != ProxyEntity.TYPE_NEKO && it.type != ProxyEntity.TYPE_CHAIN }
+            var list = SagerDatabase.proxyDao.getAll().filter { it.type != ProxyEntity.TYPE_CONFIG && it.type != ProxyEntity.TYPE_NEKO && it.type != ProxyEntity.TYPE_CHAIN }
+            
+            val groupFilterStr = DataStore.autoUrlGroupFilter
+            if (groupFilterStr.isNotBlank()) {
+                val groupIds = groupFilterStr.split(",").mapNotNull { it.trim().toLongOrNull() }
+                if (groupIds.isNotEmpty()) {
+                    val mode = DataStore.autoUrlGroupFilterMode.toIntOrNull() ?: 0
+                    if (mode == 1) {
+                        list = list.filter { groupIds.contains(it.groupId) }
+                    } else if (mode == 0) {
+                        list = list.filter { !groupIds.contains(it.groupId) }
+                    }
+                }
+            }
+
+            val countryFilterStr = DataStore.autoUrlCountryFilter
+            if (countryFilterStr.isNotBlank()) {
+                val filters = countryFilterStr.split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }
+                if (filters.isNotEmpty()) {
+                    val mode = DataStore.autoUrlCountryFilterMode.toIntOrNull() ?: 0
+                    list = list.filter { proxy ->
+                        val name = proxy.displayName().lowercase()
+                        val matches = filters.any { filter -> name.contains(filter) }
+                        if (mode == 1) matches else !matches
+                    }
+                }
+            }
+
             list.forEach {
                 tagMap[it.id] = buildChain(it.id, it)
             }
@@ -544,7 +571,7 @@ fun buildConfig(
                 type = "urltest"
                 tag = TAG_PROXY
                 outbounds = tagMap.values.toList()
-                url = "https://cp.cloudflare.com/generate_204"
+                url = DataStore.autoUrlTestUrl.takeIf { it.isNotBlank() } ?: "https://cp.cloudflare.com/generate_204"
                 tolerance = 50
             })
         } else if (buildSelector) {

@@ -356,6 +356,43 @@
             app:summary="@string/clear_cache_summary" />
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="Продвинутый Умный автовыбор">
+        <EditTextPreference
+            app:defaultValue="https://cp.cloudflare.com/generate_204"
+            app:icon="@drawable/ic_baseline_cast_connected_24"
+            app:key="autoUrlTestUrl"
+            app:title="URL для тестирования задержки"
+            app:useSimpleSummaryProvider="true" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:defaultValue="0"
+            app:entries="@array/filter_mode_entries"
+            app:entryValues="@array/filter_mode_values"
+            app:icon="@drawable/baseline_public_24"
+            app:key="autoUrlCountryFilterMode"
+            app:title="Режим фильтрации стран"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue=""
+            app:icon="@drawable/ic_baseline_edit_24"
+            app:key="autoUrlCountryFilter"
+            app:title="Коды стран (через запятую)"
+            app:summary="Например: RU, UA, BY" />
+        <moe.matsuri.nb4a.ui.SimpleMenuPreference
+            app:defaultValue="0"
+            app:entries="@array/filter_mode_entries"
+            app:entryValues="@array/filter_mode_values"
+            app:icon="@drawable/baseline_apps_24"
+            app:key="autoUrlGroupFilterMode"
+            app:title="Режим фильтрации подписок"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue=""
+            app:icon="@drawable/ic_baseline_edit_24"
+            app:key="autoUrlGroupFilter"
+            app:title="ID подписок (через запятую)"
+            app:summary="Оставьте пустым для тестирования всех" />
+    </PreferenceCategory>
+
   <PreferenceCategory
     app:title="VPN Watchdog (Авто-рестарт)"
     app:isPreferenceVisible="false">

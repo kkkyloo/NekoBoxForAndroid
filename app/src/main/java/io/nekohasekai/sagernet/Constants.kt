@@ -38,6 +38,12 @@ object Key {
 
     const val BYPASS_LAN = "bypassLan"
     const val GLOBAL_AUTO_URL = "globalAutoUrl"
+    const val AUTO_URL_TEST_URL = "autoUrlTestUrl"
+    const val AUTO_URL_COUNTRY_FILTER_MODE = "autoUrlCountryFilterMode"
+    const val AUTO_URL_COUNTRY_FILTER = "autoUrlCountryFilter"
+    const val AUTO_URL_GROUP_FILTER_MODE = "autoUrlGroupFilterMode"
+    const val AUTO_URL_GROUP_FILTER = "autoUrlGroupFilter"
+    
     const val BYPASS_LAN_IN_CORE = "bypassLanInCore"
     const val CONCURRENT_DIAL = "concurrentDial"
 

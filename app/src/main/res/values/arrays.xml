@@ -546,6 +546,16 @@
         <item>@string/filter_exclude</item>
     </string-array>
 
+    <string-array name="filter_mode_entries">
+        <item>Исключить указанные (Blacklist)</item>
+        <item>Тестировать только указанные (Whitelist)</item>
+    </string-array>
+    
+    <string-array name="filter_mode_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
     <string-array name="ssh_auth_type">
         <item>@string/ssh_auth_type_none</item>
         <item>@string/password</item>

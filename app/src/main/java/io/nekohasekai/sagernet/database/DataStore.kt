@@ -97,6 +97,12 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var showBottomBar by configurationStore.boolean(Key.SHOW_BOTTOM_BAR)
     var globalAutoUrl by configurationStore.boolean(Key.GLOBAL_AUTO_URL) { false }
+    var autoUrlTestUrl by configurationStore.string(Key.AUTO_URL_TEST_URL) { "https://cp.cloudflare.com/generate_204" }
+    var autoUrlCountryFilterMode by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER_MODE) { "0" } // 0 = exclude, 1 = include
+    var autoUrlCountryFilter by configurationStore.string(Key.AUTO_URL_COUNTRY_FILTER) { "" }
+    var autoUrlGroupFilterMode by configurationStore.string(Key.AUTO_URL_GROUP_FILTER_MODE) { "0" } // 0 = exclude, 1 = include
+    var autoUrlGroupFilter by configurationStore.string(Key.AUTO_URL_GROUP_FILTER) { "" }
+    
     var confirmProfileDelete by configurationStore.boolean(Key.CONFIRM_PROFILE_DELETE) { true }
     var groupLayoutMode by configurationStore.stringToInt(Key.GROUP_LAYOUT_MODE) { 0 }
 
