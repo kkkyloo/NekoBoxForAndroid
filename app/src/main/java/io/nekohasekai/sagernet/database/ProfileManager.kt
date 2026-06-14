@@ -209,8 +209,9 @@ object ProfileManager {
             )
 
             // 3. Обход для RU доменов (идут напрямую)
-            createRule(RuleEntity(
-                name = "Bypass RU Domains",
+            createRule(
+                RuleEntity(
+                    name = "Bypass RU Domains",
                 domains = listOf(
                     "geosite:category-ru",
                     "geosite:category-gov-ru",
@@ -240,8 +241,8 @@ object ProfileManager {
                 ).joinToString("\n"),
                 outbound = -1L, // Bypass
                 enabled = true
-            ), false
-        )
+                ), false
+            )
 
             // 4. Обход для RU IP-адресов (идут напрямую)
             createRule(
